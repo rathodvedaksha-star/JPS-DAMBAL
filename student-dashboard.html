@@ -1,0 +1,479 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | JPS Dambal</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+    }
+
+    header {
+      background: #123b65;
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+    }
+
+    header p {
+      margin: 0;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 1000px;
+      margin: 25px auto;
+    }
+
+    .panel {
+      background: white;
+      padding: 22px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px #00000010;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    button {
+      background: #1769aa;
+      color: white;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover {
+      background: #0d4f85;
+    }
+
+    .logout {
+      background: #b91c1c;
+    }
+
+    .logout:hover {
+      background: #991b1b;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+    }
+
+    .info {
+      line-height: 1.8;
+      overflow-wrap: anywhere;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 420px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 11px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background: #eaf2fa;
+    }
+
+    .message {
+      margin-top: 15px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .muted {
+      color: #64748b;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Jnyanabindu Public School</h1>
+    <p>Dambal | Student Dashboard</p>
+  </header>
+
+  <main class="container">
+    <section id="loginPanel" class="panel">
+      <h2>Student Login</h2>
+      <p>Log in with the email and password provided by your school.</p>
+
+      <form id="loginForm">
+        <label for="email">Email address</label>
+        <input id="email" type="email" required autocomplete="username">
+
+        <label for="password">Password</label>
+        <input id="password" type="password" required
+               autocomplete="current-password">
+
+        <button id="loginButton" type="submit">Login</button>
+      </form>
+
+      <p id="loginMessage" class="message" role="status"></p>
+    </section>
+
+    <section id="dashboard" class="hidden">
+      <div class="panel">
+        <h2>Welcome, <span id="welcomeName">Student</span>!</h2>
+        <p>View your school information below.</p>
+        <button id="logoutButton" class="logout" type="button">
+          Logout
+        </button>
+        <p id="dashboardMessage" class="message" role="status"></p>
+      </div>
+
+      <div class="grid">
+        <section class="panel">
+          <h2>My Profile</h2>
+          <div id="profile" class="info">Loading profile...</div>
+        </section>
+
+        <section class="panel">
+          <h2>My Attendance</h2>
+          <div id="attendance" class="info">Loading attendance...</div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <h2>My Marks and Results</h2>
+        <div id="marks" class="table-wrap">Loading marks...</div>
+      </section>
+
+      <section class="panel">
+        <h2>My Fees</h2>
+        <div id="fees" class="table-wrap">Loading fees...</div>
+      </section>
+    </section>
+  </main>
+
+  <footer>© Jnyanabindu Public School, Dambal</footer>
+
+  <script type="module">
+    import { createClient }
+      from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL =
+      "https://tjybrmumnxulnqxpsxhi.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+      "sb_publishable_1APbA6E1TJaD0iWNIxojwQ_7fPG3LT7";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const loginPanel = document.getElementById("loginPanel");
+    const dashboard = document.getElementById("dashboard");
+    const loginForm = document.getElementById("loginForm");
+    const loginButton = document.getElementById("loginButton");
+    const loginMessage = document.getElementById("loginMessage");
+    const dashboardMessage =
+      document.getElementById("dashboardMessage");
+
+    function showMessage(element, message) {
+      element.textContent = message;
+    }
+
+    function showTable(elementId, columns, rows) {
+      const container = document.getElementById(elementId);
+      container.replaceChildren();
+
+      if (!rows || rows.length === 0) {
+        container.textContent = "No records available yet.";
+        return;
+      }
+
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      columns.forEach(column => {
+        const th = document.createElement("th");
+        th.textContent = column.label;
+        headerRow.appendChild(th);
+      });
+
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      rows.forEach(row => {
+        const tr = document.createElement("tr");
+
+        columns.forEach(column => {
+          const td = document.createElement("td");
+          const value = row[column.key];
+
+          td.textContent =
+            value === null || value === undefined || value === ""
+              ? "—"
+              : String(value);
+
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    async function loadDashboard(user) {
+      loginPanel.classList.add("hidden");
+      dashboard.classList.remove("hidden");
+
+      showMessage(dashboardMessage, "Checking your student account...");
+
+      const { data: role, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (roleError) {
+        throw new Error("Could not verify your role. Check your RLS policies.");
+      }
+
+      if (role?.role !== "student") {
+        await supabase.auth.signOut();
+        dashboard.classList.add("hidden");
+        loginPanel.classList.remove("hidden");
+        throw new Error("This account is not registered as a student.");
+      }
+
+      const { data: student, error: studentError } = await supabase
+        .from("students")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (studentError) {
+        throw new Error("Could not load your profile. Check student table permissions.");
+      }
+
+      if (!student) {
+        throw new Error(
+          "Student profile not found. Please contact your school administrator."
+        );
+      }
+
+      document.getElementById("welcomeName").textContent =
+        student.full_name || "Student";
+
+      const profile = document.getElementById("profile");
+      profile.replaceChildren();
+
+      const profileFields = [
+        ["Full name", student.full_name],
+        ["Admission number", student.admission_number],
+        ["Class", student.class_name],
+        ["Parent name", student.parent_name],
+        ["Parent phone", student.parent_phone]
+      ];
+
+      profileFields.forEach(([label, value]) => {
+        const line = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+        line.appendChild(strong);
+        line.appendChild(
+          document.createTextNode(value ? String(value) : "—")
+        );
+        profile.appendChild(line);
+      });
+
+      const results = await Promise.all([
+        supabase
+          .from("attendance")
+          .select("attendance_date,status")
+          .eq("student_id", user.id)
+          .order("attendance_date", { ascending: false }),
+
+        supabase
+          .from("marks")
+          .select("subject,exam_name,marks_obtained,max_marks")
+          .eq("student_id", user.id)
+          .order("exam_name"),
+
+        supabase
+          .from("fees")
+          .select("description,amount,amount_paid,due_date,status")
+          .eq("student_id", user.id)
+          .order("due_date", { ascending: false })
+      ]);
+
+      const [attendanceResult, marksResult, feesResult] = results;
+
+      if (attendanceResult.error) {
+        throw new Error("Could not load attendance. Check attendance table permissions.");
+      }
+
+      if (marksResult.error) {
+        throw new Error("Could not load marks. Check marks table permissions.");
+      }
+
+      if (feesResult.error) {
+        throw new Error("Could not load fees. Check fees table permissions.");
+      }
+
+      const records = attendanceResult.data || [];
+      const present = records.filter(
+        item => item.status === "Present"
+      ).length;
+      const absent = records.filter(
+        item => item.status === "Absent"
+      ).length;
+      const late = records.filter(
+        item => item.status === "Late"
+      ).length;
+
+      const attendance = document.getElementById("attendance");
+      attendance.replaceChildren();
+
+      [
+        `Total recorded days: ${records.length}`,
+        `Present: ${present}`,
+        `Absent: ${absent}`,
+        `Late: ${late}`
+      ].forEach(text => {
+        const p = document.createElement("p");
+        p.textContent = text;
+        attendance.appendChild(p);
+      });
+
+      showTable("attendance", [
+        { key: "attendance_date", label: "Date" },
+        { key: "status", label: "Status" }
+      ], records);
+
+      showTable("marks", [
+        { key: "subject", label: "Subject" },
+        { key: "exam_name", label: "Exam" },
+        { key: "marks_obtained", label: "Marks" },
+        { key: "max_marks", label: "Maximum Marks" }
+      ], marksResult.data);
+
+      showTable("fees", [
+        { key: "description", label: "Description" },
+        { key: "amount", label: "Total Amount" },
+        { key: "amount_paid", label: "Amount Paid" },
+        { key: "due_date", label: "Due Date" },
+        { key: "status", label: "Status" }
+      ], feesResult.data);
+
+      showMessage(dashboardMessage, "");
+    }
+
+    loginForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      loginButton.disabled = true;
+      showMessage(loginMessage, "Logging in...");
+
+      try {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        await loadDashboard(data.user);
+      } catch (error) {
+        showMessage(
+          loginMessage,
+          error.message || "Login failed. Please try again."
+        );
+      } finally {
+        loginButton.disabled = false;
+      }
+    });
+
+    document.getElementById("logoutButton")
+      .addEventListener("click", async () => {
+        const { error } = await supabase.auth.signOut();
+
+        if (error) {
+          showMessage(dashboardMessage, error.message);
+          return;
+        }
+
+        dashboard.classList.add("hidden");
+        loginPanel.classList.remove("hidden");
+        loginForm.reset();
+        showMessage(loginMessage, "You have logged out.");
+      });
+
+    async function checkExistingSession() {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error) {
+        showMessage(loginMessage, error.message);
+        return;
+      }
+
+      if (data.session?.user) {
+        try {
+          await loadDashboard(data.session.user);
+        } catch (error) {
+          showMessage(loginMessage, error.message);
+        }
+      }
+    }
+
+    checkExistingSession();
+  </script>
+</body>
+</html>
+```
