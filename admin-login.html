@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JPS Admin Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef3f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .login {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 320px;
+      max-width: calc(100% - 60px);
+      box-shadow: 0 4px 18px #0002;
+    }
+    h2 { color: #123d72; text-align: center; }
+    input, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      box-sizing: border-box;
+      border-radius: 6px;
+    }
+    input { border: 1px solid #bbb; }
+    button {
+      background: #123d72;
+      color: white;
+      border: 0;
+      cursor: pointer;
+    }
+    #message { overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <div class="login">
+    <h2>JPS Admin Login</h2>
+    <form id="loginForm">
+      <input id="email" type="email" placeholder="Admin email"
+        autocomplete="username" required>
+      <input id="password" type="password" placeholder="Password"
+        autocomplete="current-password" required>
+      <button id="loginButton" type="submit">Sign In</button>
+    </form>
+    <p id="message" role="status"></p>
+  </div>
+
+  <script type="module">
+    import { createClient } from
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://tjybrmumnxulnqxpsxhi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_1APbA6E1TJaD0iWNIxojwQ_7fPG3LT7";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+    const button = document.getElementById("loginButton");
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      button.disabled = true;
+      message.textContent = "Signing in...";
+
+      try {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+        if (!data.user) throw new Error("User account not found.");
+
+        const { data: roleData, error: roleError } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", data.user.id)
+          .maybeSingle();
+
+        if (roleError) throw roleError;
+
+        if (roleData?.role !== "admin") {
+          await supabase.auth.signOut();
+          throw new Error("This account does not have admin access.");
+        }
+
+        window.location.href = "admin-dashboard.html";
+      } catch (error) {
+        message.textContent = error.message || "Login failed.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
