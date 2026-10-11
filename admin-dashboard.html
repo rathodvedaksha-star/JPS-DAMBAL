@@ -1,0 +1,362 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JPS Admin Dashboard</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f1f5f9;
+      color: #243247;
+    }
+
+    header {
+      background: #123d72;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 25px auto;
+      padding: 16px;
+    }
+
+    .welcome, .card {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px #0000000d;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 18px;
+    }
+
+    h2, h3 { color: #123d72; }
+
+    label {
+      display: block;
+      margin-top: 13px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+
+    button {
+      padding: 11px 16px;
+      margin-top: 15px;
+      border: 0;
+      border-radius: 6px;
+      background: #1768b2;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #logout { background: #b42318; }
+
+    #studentMessage, #message {
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .note {
+      color: #526174;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <strong>JNYANABINDU PUBLIC SCHOOL</strong>
+      <div>JPS DAMBAL — Administration</div>
+    </div>
+    <button id="logout" type="button">Sign Out</button>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <h2>Admin Dashboard</h2>
+      <p id="welcome">Checking your login...</p>
+      <p id="message" role="status"></p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h3>Student Management</h3>
+        <p>Add a student account and save their profile.</p>
+
+        <form id="studentForm">
+          <label for="studentEmail">Student email</label>
+          <input id="studentEmail" type="email"
+            autocomplete="off" required
+            placeholder="Student email address">
+
+          <label for="studentPassword">Temporary password</label>
+          <input id="studentPassword" type="password"
+            minlength="12" autocomplete="new-password"
+            required placeholder="At least 12 characters">
+
+          <label for="admissionNumber">Admission number</label>
+          <input id="admissionNumber" required
+            placeholder="e.g. JPS001">
+
+          <label for="studentName">Student full name</label>
+          <input id="studentName" required
+            placeholder="Student full name">
+
+          <label for="studentClass">Class</label>
+          <input id="studentClass" required
+            placeholder="e.g. Class 1">
+
+          <label for="parentName">Parent name (optional)</label>
+          <input id="parentName" placeholder="Parent name">
+
+          <label for="parentPhone">Parent phone (optional)</label>
+          <input id="parentPhone" type="tel"
+            placeholder="Parent phone number">
+
+          <button id="createStudentButton" type="submit">
+            Create Student
+          </button>
+        </form>
+
+        <p id="studentMessage" role="status"></p>
+        <p class="note">
+          This creates a student login and profile. Use a temporary
+          password and share it securely with the student or parent.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>Attendance</h3>
+        <p>Record and manage student attendance.</p>
+        <p class="note">Attendance management will be connected next.</p>
+      </div>
+
+      <div class="card">
+        <h3>Marks and Results</h3>
+        <p>Manage exam marks and student results.</p>
+        <p class="note">Marks management will be connected next.</p>
+      </div>
+
+      <div class="card">
+        <h3>Fees</h3>
+        <p>Track fees, payments and outstanding balances.</p>
+        <p class="note">Fee management will be connected next.</p>
+      </div>
+
+      <div class="card">
+        <h3>Website Enquiries</h3>
+        <p>Manage enquiries submitted through the school website.</p>
+        <p class="note">Enquiry viewing will be connected next.</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL =
+      "https://tjybrmumnxulnqxpsxhi.supabase.co";
+
+    const SUPABASE_KEY =
+      "sb_publishable_1APbA6E1TJaD0iWNIxojwQ_7fPG3LT7";
+
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const welcome = document.getElementById("welcome");
+    const message = document.getElementById("message");
+    const studentMessage = document.getElementById("studentMessage");
+    const studentForm = document.getElementById("studentForm");
+    const createButton = document.getElementById("createStudentButton");
+
+    let adminUser = null;
+
+    async function checkAdmin() {
+      const { data: { user }, error: sessionError } =
+        await supabase.auth.getUser();
+
+      if (sessionError) throw sessionError;
+
+      if (!user) {
+        welcome.textContent = "You are not signed in.";
+        message.textContent = "Please sign in to continue. ";
+
+        const link = document.createElement("a");
+        link.href = "admin-login.html";
+        link.textContent = "Go to Admin Login";
+        message.appendChild(link);
+
+        studentForm.hidden = true;
+        return;
+      }
+
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (roleError) throw roleError;
+
+      if (roleData?.role !== "admin") {
+        welcome.textContent = "Admin access not confirmed.";
+        message.textContent =
+          "This account does not have the admin role.";
+        studentForm.hidden = true;
+        return;
+      }
+
+      adminUser = user;
+      welcome.textContent = "Welcome, " + user.email;
+      message.textContent = "Admin access verified successfully.";
+      studentForm.hidden = false;
+    }
+
+    studentForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      studentMessage.textContent = "";
+
+      if (!adminUser) {
+        studentMessage.textContent =
+          "Admin login has not been verified. Sign in again.";
+        return;
+      }
+
+      createButton.disabled = true;
+      createButton.textContent = "Creating student...";
+
+      try {
+        const { data: { session }, error: sessionError } =
+          await supabase.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (!session?.access_token) {
+          throw new Error("Your session expired. Please sign in again.");
+        }
+
+        const input = {
+          email: document.getElementById("studentEmail").value.trim(),
+          password: document.getElementById("studentPassword").value,
+          role: "student",
+          admission_number:
+            document.getElementById("admissionNumber").value.trim(),
+          full_name:
+            document.getElementById("studentName").value.trim(),
+          class_name:
+            document.getElementById("studentClass").value.trim(),
+          parent_name:
+            document.getElementById("parentName").value.trim(),
+          parent_phone:
+            document.getElementById("parentPhone").value.trim()
+        };
+
+        if (input.password.length < 12) {
+          throw new Error(
+            "The temporary password must contain at least 12 characters."
+          );
+        }
+
+        const { data, error } = await supabase.functions.invoke(
+          "manage-school-users",
+          {
+            body: input,
+            headers: {
+              Authorization: "Bearer " + session.access_token
+            }
+          }
+        );
+
+        if (error) {
+          let details = error.message;
+
+          if (error.context) {
+            try {
+              const response = await error.context.json();
+              if (response?.error) details = response.error;
+            } catch {
+              // Keep the original error message.
+            }
+          }
+
+          throw new Error(details);
+        }
+
+        if (data?.error) {
+          throw new Error(data.error);
+        }
+
+        studentMessage.textContent =
+          "Success! Student account and profile created.";
+
+        studentForm.reset();
+      } catch (error) {
+        studentMessage.textContent =
+          "Could not create student: " +
+          (error.message || "Unknown error");
+      } finally {
+        createButton.disabled = false;
+        createButton.textContent = "Create Student";
+      }
+    });
+
+    document.getElementById("logout").addEventListener(
+      "click",
+      async () => {
+        const { error } = await supabase.auth.signOut();
+
+        if (error) {
+          message.textContent = error.message;
+          return;
+        }
+
+        window.location.href = "admin-login.html";
+      }
+    );
+
+    checkAdmin().catch((error) => {
+      welcome.textContent = "Could not verify admin access.";
+      message.textContent = error.message;
+      studentForm.hidden = true;
+    });
+  </script>
+</body>
+</html>
