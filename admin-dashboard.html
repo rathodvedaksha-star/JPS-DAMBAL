@@ -178,11 +178,22 @@
         <p class="note">Fee management will be connected next.</p>
       </div>
 
-      <div class="card">
-        <h3>Website Enquiries</h3>
-        <p>Manage enquiries submitted through the school website.</p>
-        <p class="note">Enquiry viewing will be connected next.</p>
-      </div>
+      
+<div class="card">
+  <h3>Website Enquiries</h3>
+  <p>View messages submitted through the school website.</p>
+
+  <button type="button" id="loadEnquiries">
+    Load Enquiries
+  </button>
+
+  <p id="enquiryStatus" class="note" role="status"></p>
+
+  <div id="enquiriesList">
+    <p>Click "Load Enquiries" to view messages.</p>
+  </div>
+</div>
+
     </section>
   </main>
 
@@ -206,6 +217,95 @@
     const studentMessage = document.getElementById("studentMessage");
     const studentForm = document.getElementById("studentForm");
     const createButton = document.getElementById("createStudentButton");
+    
+const loadEnquiriesButton = document.getElementById("loadEnquiries");
+const enquiryStatus = document.getElementById("enquiryStatus");
+const enquiriesList = document.getElementById("enquiriesList");
+
+loadEnquiriesButton.addEventListener("click", async () => {
+  loadEnquiriesButton.disabled = true;
+  enquiryStatus.textContent = "Loading enquiries...";
+  enquiriesList.replaceChildren();
+
+  try {
+    const { data, error } = await supabase
+      .from("school_enquiries")
+      .select("id, name, email, phone, subject, message, created_at")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      enquiryStatus.textContent = "No enquiries found.";
+      return;
+    }
+
+    data.forEach((enquiry) => {
+      const card = document.createElement("div");
+      card.style.cssText =
+        "border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin:12px 0;";
+
+      const title = document.createElement("h4");
+      title.textContent = enquiry.name || "Unnamed visitor";
+      card.appendChild(title);
+
+      [
+        ["Email", enquiry.email],
+        ["Phone", enquiry.phone],
+        ["Enquiry type", enquiry.subject],
+        ["Message", enquiry.message],
+        [
+          "Submitted",
+          enquiry.created_at
+            ? new Date(enquiry.created_at).toLocaleString()
+            : "Not available"
+        ]
+      ].forEach(([label, value]) => {
+        const line = document.createElement("p");
+        line.textContent = `${label}: ${value || "Not provided"}`;
+        line.style.overflowWrap = "anywhere";
+        card.appendChild(line);
+      });
+      
+      const whatsappButton = document.createElement("a");
+
+      const phone = (enquiry.phone || "").replace(/\D/g, "");
+      const whatsappNumber =
+        phone.length === 10 ? "91" + phone : phone;
+
+      if (whatsappNumber.length >= 10 && whatsappNumber.length <= 15) {
+        const message = `Hello ${enquiry.name || "Parent"}, thank you for contacting Jnyanabindu Public School, Dambal. We received your enquiry about ${enquiry.subject || "your request"}. How can we help you?`;
+
+        whatsappButton.href =
+          "https://wa.me/" + whatsappNumber +
+          "?text=" + encodeURIComponent(message);
+
+        whatsappButton.target = "_blank";
+        whatsappButton.rel = "noopener noreferrer";
+        whatsappButton.textContent = "💬 Contact on WhatsApp";
+        whatsappButton.style.cssText =
+          "display:inline-block;background:#25D366;color:white;padding:10px 14px;border-radius:6px;text-decoration:none;font-weight:bold;margin-top:8px;";
+
+        card.appendChild(whatsappButton);
+      } else {
+        const noPhone = document.createElement("p");
+        noPhone.textContent = "WhatsApp unavailable: check the phone number.";
+        card.appendChild(noPhone);
+      }
+
+
+      enquiriesList.appendChild(card);
+    });
+
+    enquiryStatus.textContent = `Loaded ${data.length} enquiry(s).`;
+  } catch (error) {
+    enquiryStatus.textContent =
+      "Could not load enquiries: " + error.message;
+  } finally {
+    loadEnquiriesButton.disabled = false;
+  }
+});
+
 
     let adminUser = null;
 
