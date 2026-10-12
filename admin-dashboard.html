@@ -163,7 +163,53 @@
       <div class="card">
         <h3>Attendance</h3>
         <p>Record and manage student attendance.</p>
-        <p class="note">Attendance management will be connected next.</p>
+        <p class="note">
+<form id="attendanceForm">
+  <label for="attendanceStudent">Select student</label>
+  <select id="attendanceStudent" required>
+    <option value="">Loading students...</option>
+  </select>
+
+  <label for="attendanceDate">Attendance date</label>
+  <input
+    id="attendanceDate"
+    type="date"
+    required
+  >
+
+  <label for="attendanceStatus">Status</label>
+  <select id="attendanceStatus" required>
+    <option value="Present">Present</option>
+    <option value="Absent">Absent</option>
+    <option value="Late">Late</option>
+  </select>
+
+  <button type="submit" id="saveAttendanceButton">
+    Save Attendance
+  </button>
+
+  <p id="attendanceMessage" class="note" role="status"></p>
+</form>
+
+<hr>
+
+<h4>View Attendance Records</h4>
+
+<label for="attendanceViewDate">Choose date</label>
+<input type="date" id="attendanceViewDate" required>
+
+<button type="button" id="viewAttendanceButton">
+  View Attendance
+</button>
+
+<p id="attendanceViewMessage" class="note" role="status"></p>
+
+<div id="attendanceRecords">
+  <p>Select a date to view attendance records.</p>
+</div>
+
+
+</p>
       </div>
 
       <div class="card">
@@ -663,17 +709,22 @@ marksForm.addEventListener("submit", async (event) => {
       studentForm.hidden = true;
     });
     
-const resultsStudent = document.getElementById("resultsStudent");
-const resultsMessage = document.getElementById("resultsMessage");
-const resultsList = document.getElementById("resultsList");
+const attendanceStudent = document.getElementById("attendanceStudent");
+const attendanceDate = document.getElementById("attendanceDate");
+const attendanceStatus = document.getElementById("attendanceStatus");
+const attendanceMessage = document.getElementById("attendanceMessage");
+const attendanceForm = document.getElementById("attendanceForm");
 
-async function loadStudentsForResults() {
-  resultsStudent.replaceChildren();
+// Set today's date as the default.
+attendanceDate.value = new Date().toLocaleDateString("en-CA");
 
-  const firstOption = document.createElement("option");
-  firstOption.value = "";
-  firstOption.textContent = "Loading students...";
-  resultsStudent.appendChild(firstOption);
+async function loadStudentsForAttendance() {
+  attendanceStudent.replaceChildren();
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Loading students...";
+  attendanceStudent.appendChild(placeholder);
 
   try {
     const { data, error } = await supabase
@@ -683,134 +734,174 @@ async function loadStudentsForResults() {
 
     if (error) throw error;
 
-    resultsStudent.replaceChildren();
+    attendanceStudent.replaceChildren();
+
+    const firstOption = document.createElement("option");
+    firstOption.value = "";
+    firstOption.textContent = data?.length
+      ? "Select a student"
+      : "No students found";
+    attendanceStudent.appendChild(firstOption);
+
+    (data || []).forEach((student) => {
+      const option = document.createElement("option");
+      option.value = student.id;
+      option.textContent =
+        `${student.full_name} (${student.admission_number || "No admission number"}) - ${student.class_name || ""}`;
+      attendanceStudent.appendChild(option);
+    });
+  } catch (error) {
+    attendanceStudent.replaceChildren();
 
     const option = document.createElement("option");
     option.value = "";
-    option.textContent = "Select a student";
-    resultsStudent.appendChild(option);
+    option.textContent = "Could not load students";
+    attendanceStudent.appendChild(option);
 
-    (data || []).forEach((student) => {
-      const studentOption = document.createElement("option");
-      studentOption.value = student.id;
-      studentOption.textContent =
-        `${student.full_name} (${student.admission_number || "No admission number"}) - ${student.class_name || ""}`;
-      resultsStudent.appendChild(studentOption);
-    });
-  } catch (error) {
-    resultsMessage.textContent =
+    attendanceMessage.textContent =
       "Could not load students: " + error.message;
   }
 }
 
-function displayResults(rows) {
-  resultsList.replaceChildren();
+attendanceForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  attendanceMessage.textContent = "";
 
-  if (!rows.length) {
-    resultsList.textContent = "No marks found.";
+  const studentId = attendanceStudent.value;
+  const date = attendanceDate.value;
+  const status = attendanceStatus.value;
+
+  if (!studentId || !date || !["Present", "Absent", "Late"].includes(status)) {
+    attendanceMessage.textContent =
+      "Please select a student, date, and valid status.";
     return;
   }
 
-  const table = document.createElement("table");
-  const headings = [
-    "Student", "Class", "Exam", "Subject", "Marks", "Percentage"
-  ];
-
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-
-  headings.forEach((heading) => {
-    const th = document.createElement("th");
-    th.textContent = heading;
-    headerRow.appendChild(th);
-  });
-
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  const tbody = document.createElement("tbody");
-
-  rows.forEach((row) => {
-    const tr = document.createElement("tr");
-    const max = Number(row.max_marks);
-    const obtained = Number(row.marks_obtained);
-    const percentage = max > 0 ? (obtained / max) * 100 : 0;
-
-    const values = [
-      row.students?.full_name || "Unknown",
-      row.students?.class_name || "",
-      row.exam_name,
-      row.subject,
-      `${obtained} / ${max}`,
-      `${percentage.toFixed(2)}%`
-    ];
-
-    values.forEach((value) => {
-      const td = document.createElement("td");
-      td.textContent = String(value ?? "");
-      tr.appendChild(td);
-    });
-
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  resultsList.appendChild(table);
-}
-
-async function fetchResults(studentId = null) {
-  resultsMessage.textContent = "Loading results...";
-  resultsList.replaceChildren();
+  const saveButton = document.getElementById("saveAttendanceButton");
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
 
   try {
-    let query = supabase
-      .from("marks")
-      .select(`
-        exam_name,
-        subject,
-        marks_obtained,
-        max_marks,
-        students (
-          full_name,
-          class_name
-        )
-      `)
-      .order("exam_name");
-
-    if (studentId) {
-      query = query.eq("student_id", studentId);
-    }
-
-    const { data, error } = await query;
+    const { error } = await supabase
+      .from("attendance")
+      .insert({
+        student_id: studentId,
+        attendance_date: date,
+        status: status
+      });
 
     if (error) throw error;
 
-    displayResults(data || []);
-    resultsMessage.textContent =
-      `Loaded ${(data || []).length} result record(s).`;
+    attendanceMessage.textContent = "Attendance saved successfully!";
+    attendanceForm.reset();
+    attendanceDate.value = new Date().toLocaleDateString("en-CA");
+    await loadStudentsForAttendance();
   } catch (error) {
-    resultsMessage.textContent =
-      "Could not load results: " + error.message;
+    if (error.code === "23505") {
+      attendanceMessage.textContent =
+        "Attendance already exists for this student on this date.";
+    } else {
+      attendanceMessage.textContent =
+        "Could not save attendance: " + error.message;
+    }
+  } finally {
+    saveButton.disabled = false;
+    saveButton.textContent = "Save Attendance";
   }
-}
+});
 
-document
-  .getElementById("viewStudentResults")
-  .addEventListener("click", () => {
-    if (!resultsStudent.value) {
-      resultsMessage.textContent = "Please select a student.";
+loadStudentsForAttendance();
+
+const attendanceViewDate = document.getElementById("attendanceViewDate");
+const viewAttendanceButton = document.getElementById("viewAttendanceButton");
+const attendanceViewMessage = document.getElementById("attendanceViewMessage");
+const attendanceRecords = document.getElementById("attendanceRecords");
+
+// Default to today's date.
+attendanceViewDate.value = new Date().toLocaleDateString("en-CA");
+
+async function loadAttendanceRecords() {
+  const date = attendanceViewDate.value;
+
+  if (!date) {
+    attendanceViewMessage.textContent = "Please choose a date.";
+    return;
+  }
+
+  attendanceViewMessage.textContent = "Loading attendance...";
+  attendanceRecords.replaceChildren();
+
+  try {
+    const { data, error } = await supabase
+      .from("attendance")
+      .select(`
+        attendance_date,
+        status,
+        students (
+          full_name,
+          admission_number,
+          class_name
+        )
+      `)
+      .eq("attendance_date", date)
+      .order("status");
+
+    if (error) throw error;
+
+    if (!data || data.length === 0) {
+      attendanceRecords.textContent =
+        "No attendance records found for this date.";
+      attendanceViewMessage.textContent = "0 records found.";
       return;
     }
 
-    fetchResults(resultsStudent.value);
-  });
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const header = document.createElement("tr");
 
-document
-  .getElementById("viewAllResults")
-  .addEventListener("click", () => fetchResults());
+    ["Student", "Admission No.", "Class", "Status"].forEach((heading) => {
+      const th = document.createElement("th");
+      th.textContent = heading;
+      header.appendChild(th);
+    });
 
-loadStudentsForResults();
+    thead.appendChild(header);
+    table.appendChild(thead);
 
+    const tbody = document.createElement("tbody");
+
+    data.forEach((record) => {
+      const row = document.createElement("tr");
+      const student = record.students;
+
+      [
+        student?.full_name || "Unknown",
+        student?.admission_number || "—",
+        student?.class_name || "—",
+        record.status
+      ].forEach((value) => {
+        const td = document.createElement("td");
+        td.textContent = String(value);
+        row.appendChild(td);
+      });
+
+      tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    attendanceRecords.appendChild(table);
+    attendanceViewMessage.textContent =
+      `${data.length} attendance record(s) found for ${date}.`;
+  } catch (error) {
+    attendanceViewMessage.textContent =
+      "Could not load attendance: " + error.message;
+  }
+}
+
+viewAttendanceButton.addEventListener("click", loadAttendanceRecords);
+
+
+    
   </script>
   
 </body>
