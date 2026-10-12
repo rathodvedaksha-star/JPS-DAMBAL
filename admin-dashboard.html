@@ -169,7 +169,99 @@
       <div class="card">
         <h3>Marks and Results</h3>
         <p>Manage exam marks and student results.</p>
-        <p class="note">Marks management will be connected next.</p>
+        <p class="note">
+<form id="marksForm">
+  <label for="marksStudent">Select student</label>
+  <select id="marksStudent" required>
+    <option value="">Loading students...</option>
+  </select>
+
+  <label for="examName">Exam name</label>
+  <input
+    id="examName"
+    type="text"
+    placeholder="e.g. Unit Test 1"
+    required
+  >
+
+  <label for="subjectName">Subject</label>
+  <input
+    id="subjectName"
+    type="text"
+    placeholder="e.g. Mathematics"
+    required
+  >
+
+  <label for="marksObtained">Marks obtained</label>
+  <input
+    id="marksObtained"
+    type="number"
+    min="0"
+    step="0.01"
+    required
+  >
+
+  <label for="maxMarks">Maximum marks</label>
+  <input
+    id="maxMarks"
+    type="number"
+    min="0.01"
+    step="0.01"
+    required
+  >
+
+  <button type="submit" id="saveMarksButton">
+    Save Marks
+  </button>
+
+  <p id="marksMessage" class="note" role="status"></p>
+</form>
+
+<hr>
+
+<h4>View Student Results</h4>
+
+<label for="resultsStudent">Select a student</label>
+<select id="resultsStudent">
+  <option value="">Select a student</option>
+</select>
+
+<button type="button" id="viewStudentResults">
+  View Selected Student
+</button>
+
+<button type="button" id="viewAllResults">
+  View All Students
+</button>
+
+<p id="resultsMessage" class="note" role="status"></p>
+
+<div id="resultsList">
+  <p>Select an option to view results.</p>
+</div>
+
+<h4>View Student Results</h4>
+
+<label for="resultsStudent">Select a student</label>
+<select id="resultsStudent">
+  <option value="">Select a student</option>
+</select>
+
+<button type="button" id="viewStudentResults">
+  View Selected Student
+</button>
+
+<button type="button" id="viewAllResults">
+  View All Students
+</button>
+
+<p id="resultsMessage" class="note" role="status"></p>
+
+<div id="resultsList">
+  <p>Select an option to view results.</p>
+</div>
+
+</p>
       </div>
 
       <div class="card">
@@ -217,6 +309,55 @@
     const studentMessage = document.getElementById("studentMessage");
     const studentForm = document.getElementById("studentForm");
     const createButton = document.getElementById("createStudentButton");
+    
+const marksStudent = document.getElementById("marksStudent");
+const marksMessage = document.getElementById("marksMessage");
+
+async function loadStudentsForMarks() {
+  marksStudent.replaceChildren();
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Loading students...";
+  marksStudent.appendChild(placeholder);
+
+  try {
+    const { data, error } = await supabase
+      .from("students")
+      .select("id, full_name, admission_number, class_name")
+      .order("full_name");
+
+    if (error) throw error;
+
+    marksStudent.replaceChildren();
+
+    const firstOption = document.createElement("option");
+    firstOption.value = "";
+    firstOption.textContent = data?.length
+      ? "Select a student"
+      : "No students found";
+    marksStudent.appendChild(firstOption);
+
+    (data || []).forEach((student) => {
+      const option = document.createElement("option");
+      option.value = student.id;
+      option.textContent =
+        `${student.full_name} (${student.admission_number || "No admission number"}) - ${student.class_name || ""}`;
+      marksStudent.appendChild(option);
+    });
+  } catch (error) {
+    marksStudent.replaceChildren();
+
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Could not load students";
+    marksStudent.appendChild(option);
+
+    marksMessage.textContent =
+      "Could not load students: " + error.message;
+  }
+}
+
     
 const loadEnquiriesButton = document.getElementById("loadEnquiries");
 const enquiryStatus = document.getElementById("enquiryStatus");
@@ -451,12 +592,226 @@ loadEnquiriesButton.addEventListener("click", async () => {
         window.location.href = "admin-login.html";
       }
     );
+    loadStudentsForMarks();
+    
+const marksForm = document.getElementById("marksForm");
+
+marksForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const studentId = document.getElementById("marksStudent").value;
+  const examName = document.getElementById("examName").value.trim();
+  const subject = document.getElementById("subjectName").value.trim();
+  const marksObtained = Number(
+    document.getElementById("marksObtained").value
+  );
+  const maxMarks = Number(
+    document.getElementById("maxMarks").value
+  );
+
+  marksMessage.textContent = "";
+
+  if (!studentId) {
+    marksMessage.textContent = "Please select a student.";
+    return;
+  }
+
+  if (
+    !examName ||
+    !subject ||
+    !Number.isFinite(marksObtained) ||
+    !Number.isFinite(maxMarks) ||
+    marksObtained < 0 ||
+    maxMarks <= 0 ||
+    marksObtained > maxMarks
+  ) {
+    marksMessage.textContent =
+      "Enter valid marks. Obtained marks cannot exceed maximum marks.";
+    return;
+  }
+
+  const saveButton = document.getElementById("saveMarksButton");
+  saveButton.disabled = true;
+  saveButton.textContent = "Saving...";
+
+  try {
+    const { error } = await supabase.from("marks").insert({
+      student_id: studentId,
+      exam_name: examName,
+      subject: subject,
+      marks_obtained: marksObtained,
+      max_marks: maxMarks
+    });
+
+    if (error) throw error;
+
+    marksMessage.textContent = "Marks saved successfully!";
+    marksForm.reset();
+    await loadStudentsForMarks();
+  } catch (error) {
+    marksMessage.textContent = "Could not save marks: " + error.message;
+  } finally {
+    saveButton.disabled = false;
+    saveButton.textContent = "Save Marks";
+  }
+});
+
 
     checkAdmin().catch((error) => {
       welcome.textContent = "Could not verify admin access.";
       message.textContent = error.message;
       studentForm.hidden = true;
     });
+    
+const resultsStudent = document.getElementById("resultsStudent");
+const resultsMessage = document.getElementById("resultsMessage");
+const resultsList = document.getElementById("resultsList");
+
+async function loadStudentsForResults() {
+  resultsStudent.replaceChildren();
+
+  const firstOption = document.createElement("option");
+  firstOption.value = "";
+  firstOption.textContent = "Loading students...";
+  resultsStudent.appendChild(firstOption);
+
+  try {
+    const { data, error } = await supabase
+      .from("students")
+      .select("id, full_name, admission_number, class_name")
+      .order("full_name");
+
+    if (error) throw error;
+
+    resultsStudent.replaceChildren();
+
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Select a student";
+    resultsStudent.appendChild(option);
+
+    (data || []).forEach((student) => {
+      const studentOption = document.createElement("option");
+      studentOption.value = student.id;
+      studentOption.textContent =
+        `${student.full_name} (${student.admission_number || "No admission number"}) - ${student.class_name || ""}`;
+      resultsStudent.appendChild(studentOption);
+    });
+  } catch (error) {
+    resultsMessage.textContent =
+      "Could not load students: " + error.message;
+  }
+}
+
+function displayResults(rows) {
+  resultsList.replaceChildren();
+
+  if (!rows.length) {
+    resultsList.textContent = "No marks found.";
+    return;
+  }
+
+  const table = document.createElement("table");
+  const headings = [
+    "Student", "Class", "Exam", "Subject", "Marks", "Percentage"
+  ];
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  headings.forEach((heading) => {
+    const th = document.createElement("th");
+    th.textContent = heading;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+
+  rows.forEach((row) => {
+    const tr = document.createElement("tr");
+    const max = Number(row.max_marks);
+    const obtained = Number(row.marks_obtained);
+    const percentage = max > 0 ? (obtained / max) * 100 : 0;
+
+    const values = [
+      row.students?.full_name || "Unknown",
+      row.students?.class_name || "",
+      row.exam_name,
+      row.subject,
+      `${obtained} / ${max}`,
+      `${percentage.toFixed(2)}%`
+    ];
+
+    values.forEach((value) => {
+      const td = document.createElement("td");
+      td.textContent = String(value ?? "");
+      tr.appendChild(td);
+    });
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  resultsList.appendChild(table);
+}
+
+async function fetchResults(studentId = null) {
+  resultsMessage.textContent = "Loading results...";
+  resultsList.replaceChildren();
+
+  try {
+    let query = supabase
+      .from("marks")
+      .select(`
+        exam_name,
+        subject,
+        marks_obtained,
+        max_marks,
+        students (
+          full_name,
+          class_name
+        )
+      `)
+      .order("exam_name");
+
+    if (studentId) {
+      query = query.eq("student_id", studentId);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    displayResults(data || []);
+    resultsMessage.textContent =
+      `Loaded ${(data || []).length} result record(s).`;
+  } catch (error) {
+    resultsMessage.textContent =
+      "Could not load results: " + error.message;
+  }
+}
+
+document
+  .getElementById("viewStudentResults")
+  .addEventListener("click", () => {
+    if (!resultsStudent.value) {
+      resultsMessage.textContent = "Please select a student.";
+      return;
+    }
+
+    fetchResults(resultsStudent.value);
+  });
+
+document
+  .getElementById("viewAllResults")
+  .addEventListener("click", () => fetchResults());
+
+loadStudentsForResults();
+
   </script>
+  
 </body>
 </html>
