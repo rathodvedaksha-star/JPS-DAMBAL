@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manage Subjects - JPS Dambal</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f1f5f9;
+      color: #243247;
+    }
+    header {
+      background: #123d72;
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    main {
+      max-width: 800px;
+      margin: 24px auto;
+      padding: 16px;
+    }
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px #0000000d;
+    }
+    h2, h3 { color: #123d72; }
+    label {
+      display: block;
+      margin-top: 13px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    input {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      margin-top: 6px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 15px;
+    }
+    button {
+      padding: 10px 14px;
+      margin: 8px 6px 0 0;
+      border: 0;
+      border-radius: 6px;
+      background: #1768b2;
+      color: white;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    #logout { background: #b42318; }
+    .status { font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+    .hidden { display: none !important; }
+    .subject-row {
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .muted { color: #526174; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <strong>JNYANABINDU PUBLIC SCHOOL</strong>
+      <div>JPS DAMBAL — Manage Subjects</div>
+    </div>
+    <div>
+      <button type="button"
+        onclick="window.location.href='admin-dashboard.html'">
+        Back to Admin Dashboard
+      </button>
+      <button id="logout" type="button">Sign Out</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Manage Subjects</h2>
+      <p id="welcome">Checking your login...</p>
+      <p id="pageMessage" class="status" role="status"></p>
+    </section>
+
+    <section id="subjectPanel" class="card hidden">
+      <h3>Add a Subject</h3>
+      <form id="subjectForm">
+        <label for="newSubjectName">Subject name</label>
+        <input id="newSubjectName" maxlength="100"
+          placeholder="e.g. Science" required>
+        <button id="addSubjectButton" type="submit">Add Subject</button>
+      </form>
+      <p id="subjectMessage" class="status" role="status"></p>
+
+      <h3>Existing Subjects</h3>
+      <div id="subjectList">Loading subjects...</div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { createClient } from
+      "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL =
+      "https://tjybrmumnxulnqxpsxhi.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "sb_publishable_1APbA6E1TJaD0iWNIxojwQ_7fPG3LT7";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const $ = id => document.getElementById(id);
+
+    const welcome = $("welcome");
+    const pageMessage = $("pageMessage");
+    const subjectPanel = $("subjectPanel");
+    const subjectForm = $("subjectForm");
+    const newSubjectInput = $("newSubjectName");
+    const subjectList = $("subjectList");
+    const subjectMessage = $("subjectMessage");
+    const addButton = $("addSubjectButton");
+
+    function showMessage(text) {
+      subjectMessage.textContent = text;
+    }
+
+    async function checkAdmin() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) throw error;
+
+      if (!user) {
+        welcome.textContent = "You are not signed in.";
+        pageMessage.textContent = "Please sign in using your admin account.";
+        const link = document.createElement("a");
+        link.href = "admin-login.html";
+        link.textContent = " Go to Admin Login";
+        pageMessage.appendChild(link);
+        return;
+      }
+
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (roleError) throw roleError;
+
+      if (roleData?.role !== "admin") {
+        welcome.textContent = "Admin access not confirmed.";
+        pageMessage.textContent = "This account does not have the admin role.";
+        return;
+      }
+
+      welcome.textContent = "Welcome, " + (user.email || "Administrator");
+      pageMessage.textContent = "Admin access verified.";
+      subjectPanel.classList.remove("hidden");
+      await loadSubjects();
+    }
+
+    async function loadSubjects() {
+      const { data, error } = await supabase
+        .from("school_subjects")
+        .select("id, name, is_active")
+        .order("name");
+
+      if (error) {
+        subjectList.textContent = "Could not load subjects.";
+        showMessage(error.message);
+        return;
+      }
+
+      subjectList.replaceChildren();
+
+      if (!data?.length) {
+        subjectList.textContent = "No subjects added yet.";
+        return;
+      }
+
+      data.forEach(subject => {
+        const row = document.createElement("div");
+        row.className = "subject-row";
+
+        const label = document.createElement("strong");
+        label.textContent = subject.name +
+          (subject.is_active ? " (Active)" : " (Inactive)");
+        row.appendChild(label);
+
+        if (subject.is_active) {
+          const renameButton = document.createElement("button");
+          renameButton.type = "button";
+          renameButton.textContent = "Rename";
+          renameButton.addEventListener("click", async () => {
+            const answer = prompt("Enter the new subject name:", subject.name);
+            if (answer === null) return;
+
+            const name = answer.trim();
+            if (!name) {
+              showMessage("Subject name cannot be empty.");
+              return;
+            }
+
+            const { error } = await supabase
+              .from("school_subjects")
+              .update({ name })
+              .eq("id", subject.id);
+
+            if (error) {
+              showMessage("Rename failed: " + error.message);
+              return;
+            }
+
+            showMessage("Subject renamed successfully.");
+            await loadSubjects();
+          });
+          row.appendChild(renameButton);
+
+          const deactivateButton = document.createElement("button");
+          deactivateButton.type = "button";
+          deactivateButton.textContent = "Deactivate";
+          deactivateButton.addEventListener("click", async () => {
+            if (!confirm(
+              "Deactivate " + subject.name +
+              "? Existing marks will be preserved."
+            )) return;
+
+            const { error } = await supabase
+              .from("school_subjects")
+              .update({ is_active: false })
+              .eq("id", subject.id);
+
+            if (error) {
+              showMessage("Deactivation failed: " + error.message);
+              return;
+            }
+
+            showMessage("Subject deactivated.");
+            await loadSubjects();
+          });
+          row.appendChild(deactivateButton);
+        }
+
+        subjectList.appendChild(row);
+      });
+    }
+
+    subjectForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      showMessage("");
+
+      const name = newSubjectInput.value.trim();
+      if (!name) {
+        showMessage("Enter a subject name.");
+        return;
+      }
+
+      addButton.disabled = true;
+      addButton.textContent = "Adding...";
+
+      try {
+        const { error } = await supabase
+          .from("school_subjects")
+          .insert({ name });
+
+        if (error) {
+          showMessage(error.code === "23505"
+            ? "That subject already exists."
+            : "Could not add subject: " + error.message);
+          return;
+        }
+
+        subjectForm.reset();
+        showMessage("Subject added successfully.");
+        await loadSubjects();
+      } catch (error) {
+        showMessage("Could not add subject: " + error.message);
+      } finally {
+        addButton.disabled = false;
+        addButton.textContent = "Add Subject";
+      }
+    });
+
+    $("logout").addEventListener("click", async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        pageMessage.textContent = error.message;
+        return;
+      }
+      window.location.href = "admin-login.html";
+    });
+
+    checkAdmin().catch(error => {
+      welcome.textContent = "Could not verify admin access.";
+      pageMessage.textContent = error.message || "Please sign in again.";
+    });
+  </script>
+</body>
+</html>

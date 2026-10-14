@@ -108,3 +108,29 @@ contactForm.addEventListener("submit", async event => {
         submitButton.textContent = "Send Enquiry";
     }
 });
+// JPS Hero Automatic Photo Slideshow
+const heroSection = document.querySelector(".hero");
+
+if (heroSection) {
+    const heroPhotos = [
+        "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1800&q=85",
+        "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=85",
+        "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1800&q=85"
+    ];
+
+    let currentHeroPhoto = 0;
+
+    setInterval(() => {
+        currentHeroPhoto =
+            (currentHeroPhoto + 1) % heroPhotos.length;
+
+        heroSection.style.backgroundImage = `
+            linear-gradient(
+                90deg,
+                rgba(5, 25, 55, 0.88),
+                rgba(5, 25, 55, 0.35)
+            ),
+            url("${heroPhotos[currentHeroPhoto]}")
+        `;
+    }, 5000);
+}
