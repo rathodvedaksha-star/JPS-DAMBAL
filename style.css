@@ -570,6 +570,7 @@ footer {
         padding: 50px 6%;
     }
 }
+
 /* JPS HERO PHOTO SLIDESHOW */
 .hero {
     position: relative;
@@ -577,21 +578,25 @@ footer {
     display: flex;
     align-items: center;
     overflow: hidden;
+
     background:
         linear-gradient(
             90deg,
-            rgba(5, 25, 55, 0.88),
-            rgba(5, 25, 55, 0.35)
+            rgba(5, 25, 55, 0.78),
+            rgba(5, 25, 55, 0.25)
         ),
         url("https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1800&q=85")
         center / cover no-repeat;
+
     transition: background-image 0.5s ease;
 }
 
 .hero-content {
     position: relative;
     z-index: 2;
+    width: 100%;
     max-width: 720px;
+    box-sizing: border-box;
     padding: 70px 7%;
     color: #ffffff;
 }
@@ -602,55 +607,35 @@ footer {
     color: #ffffff;
 }
 
+/* Mobile layout */
 @media (max-width: 768px) {
     .hero {
-        min-height: 480px;
-        background-position: center;
+        min-height: 0;
+        height: auto;
+        padding: 0;
+        background-position: center center;
     }
 
     .hero-content {
-        padding: 50px 6%;
-    }
-}
-/* JPS HERO PHOTO SLIDESHOW */
-.hero {
-    position: relative;
-    min-height: 560px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(5, 25, 55, 0.88),
-            rgba(5, 25, 55, 0.35)
-        ),
-        url("https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1800&q=85")
-        center / cover no-repeat;
-    transition: background-image 0.5s ease;
-}
-
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 720px;
-    padding: 70px 7%;
-    color: #ffffff;
-}
-
-.hero h1,
-.hero p,
-.hero .tagline {
-    color: #ffffff;
-}
-
-@media (max-width: 768px) {
-    .hero {
-        min-height: 480px;
-        background-position: center;
+        max-width: 100%;
+        padding: 55px 6%;
     }
 
+    .hero h1 {
+        font-size: clamp(28px, 7vw, 38px);
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    .hero p {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+}
+
+/* Smaller phones */
+@media (max-width: 400px) {
     .hero-content {
-        padding: 50px 6%;
+        padding: 42px 5%;
     }
 }
