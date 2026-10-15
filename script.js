@@ -108,29 +108,70 @@ contactForm.addEventListener("submit", async event => {
         submitButton.textContent = "Send Enquiry";
     }
 });
-// JPS Hero Automatic Photo Slideshow
+
+ // JPS Hero Slideshow — Load photos from Supabase
 const heroSection = document.querySelector(".hero");
 
 if (heroSection) {
-    const heroPhotos = [
+    const heroFallbackPhotos = [
         "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=1800&q=85",
         "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=85",
         "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?auto=format&fit=crop&w=1800&q=85"
     ];
 
+    let heroPhotos = [...heroFallbackPhotos];
     let currentHeroPhoto = 0;
 
-    setInterval(() => {
-        currentHeroPhoto =
-            (currentHeroPhoto + 1) % heroPhotos.length;
-
+    function showHeroPhoto(index) {
         heroSection.style.backgroundImage = `
             linear-gradient(
                 90deg,
                 rgba(5, 25, 55, 0.88),
                 rgba(5, 25, 55, 0.35)
             ),
-            url("${heroPhotos[currentHeroPhoto]}")
+            url("${heroPhotos[index]}")
         `;
-    }, 5000);
+    }
+
+    async function loadSchoolHeroPhotos() {
+        try {
+            const { data, error } = await supabase
+                .from("school_gallery")
+                .select("image_path, category, display_order")
+                .eq("is_active", true)
+                .in("category", ["banner", "event"])
+                .order("display_order", { ascending: true });
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                heroPhotos = data.map(photo => {
+                    const { data: imageData } = supabase.storage
+                        .from("school-gallery")
+                        .getPublicUrl(photo.image_path);
+
+                    return imageData.publicUrl;
+                });
+
+                currentHeroPhoto = 0;
+                showHeroPhoto(currentHeroPhoto);
+            } else {
+                showHeroPhoto(currentHeroPhoto);
+            }
+        } catch (error) {
+            console.error("Could not load school gallery photos:", error);
+            showHeroPhoto(currentHeroPhoto);
+        }
+
+        if (heroPhotos.length > 1) {
+            setInterval(() => {
+                currentHeroPhoto =
+                    (currentHeroPhoto + 1) % heroPhotos.length;
+
+                showHeroPhoto(currentHeroPhoto);
+            }, 5000);
+        }
+    }
+
+    loadSchoolHeroPhotos();
 }
