@@ -10,31 +10,37 @@ const supabase = createClient(
     SUPABASE_URL,
     SUPABASE_PUBLISHABLE_KEY
 );
-
-// Mobile navigation menu
+ // Mobile navigation menu
 const menuToggle = document.getElementById("menuToggle");
 const navLinks = document.getElementById("navLinks");
 
-menuToggle.addEventListener("click", () => {
-    navLinks.classList.toggle("active");
+if (menuToggle && navLinks) {
+    menuToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
 
-    const isOpen = navLinks.classList.contains("active");
+        const isOpen = navLinks.classList.contains("active");
 
-    menuToggle.textContent = isOpen ? "✕" : "☰";
-    menuToggle.setAttribute("aria-expanded", String(isOpen));
-});
-
-document.querySelectorAll(".nav-links a").forEach(link => {
-    link.addEventListener("click", () => {
-        navLinks.classList.remove("active");
-        menuToggle.textContent = "☰";
-        menuToggle.setAttribute("aria-expanded", "false");
+        menuToggle.textContent = isOpen ? "✕" : "☰ & view";
+        menuToggle.setAttribute("aria-expanded", String(isOpen));
     });
-});
 
-// Current year
-document.getElementById("year").textContent =
-    new Date().getFullYear();
+    document.querySelectorAll(".nav-links a").forEach(link => {
+        link.addEventListener("click", () => {
+            navLinks.classList.remove("active");
+            menuToggle.textContent = "☰ & view";
+            menuToggle.setAttribute("aria-expanded", "false");
+        });
+    });
+}
+
+
+ // Current year
+const yearElement = document.getElementById("year");
+
+if (yearElement) {
+    yearElement.textContent = new Date().getFullYear();
+}
+
 
 // Save school enquiries to Supabase
 const contactForm = document.getElementById("contactForm");
