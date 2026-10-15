@@ -1,0 +1,504 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage School Gallery | JPS Dambal</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1e293b;
+        }
+
+        header {
+            background: #123b70;
+            color: white;
+            padding: 22px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        header h1 { font-size: 22px; margin: 0; }
+        header a { color: white; text-decoration: none; margin-left: 14px; }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 18px;
+        }
+
+        .panel {
+            background: white;
+            padding: 24px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 20px #152b4b0d;
+        }
+
+        h2 { margin-top: 0; color: #123b70; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+        }
+
+        .full-width { grid-column: 1 / -1; }
+
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .primary { background: #1769aa; color: white; }
+        .danger { background: #fee2e2; color: #b91c1c; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        #status {
+            margin-top: 15px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .photo-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 190px;
+            object-fit: cover;
+            display: block;
+            background: #e2e8f0;
+        }
+
+        .photo-info { padding: 14px; }
+        .photo-info h3 { margin: 0 0 8px; overflow-wrap: anywhere; }
+
+        .category {
+            display: inline-block;
+            padding: 5px 9px;
+            background: #e0edff;
+            color: #174ea6;
+            border-radius: 20px;
+            font-size: 12px;
+            text-transform: capitalize;
+        }
+
+        .photo-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .photo-actions label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .photo-actions input { width: auto; }
+        .empty { color: #64748b; padding: 15px 0; }
+
+        @media (max-width: 750px) {
+            .gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 500px) {
+            .form-grid, .gallery-grid { grid-template-columns: 1fr; }
+            .panel { padding: 17px; }
+            header h1 { font-size: 19px; }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <h1>JPS Dambal — Photo Gallery</h1>
+    <nav>
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="index.html">View Website</a>
+    </nav>
+</header>
+
+<main>
+    <section class="panel">
+        <h2>Upload a School Photo</h2>
+        <p>
+            Add a banner, poster, or event photo to your school's gallery.
+            Accepted formats: JPG, PNG and WebP. Maximum size: 5 MB.
+        </p>
+
+        <form id="uploadForm">
+            <div class="form-grid">
+                <div>
+                    <label for="photoTitle">Photo title</label>
+                    <input
+                        id="photoTitle"
+                        type="text"
+                        maxlength="120"
+                        placeholder="Example: Annual Day Celebration"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="photoCategory">Category</label>
+                    <select id="photoCategory" required>
+                        <option value="banner">School Banner</option>
+                        <option value="poster">School Poster</option>
+                        <option value="event">School Event</option>
+                    </select>
+                </div>
+
+                <div class="full-width">
+                    <label for="photoFile">Choose photo</label>
+                    <input
+                        id="photoFile"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="photoOrder">Display order</label>
+                    <input
+                        id="photoOrder"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value="0"
+                        required
+                    >
+                </div>
+
+                <div class="full-width">
+                    <button class="primary" id="uploadButton" type="submit">
+                        Upload Photo
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <p id="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel">
+        <h2>Uploaded Photos</h2>
+        <p>Photos marked active are eligible to appear on your website.</p>
+        <div id="galleryList" class="gallery-grid">
+            <p class="empty">Loading photos...</p>
+        </div>
+    </section>
+</main>
+
+<script>
+    const SUPABASE_URL =
+        "https://tjybrmumnxulnqxpsxhi.supabase.co";
+
+    const SUPABASE_PUBLISHABLE_KEY =
+        "sb_publishable_1APbA6E1TJaD0iWNIxojwQ_7fPG3LT7";
+
+    const BUCKET = "school-gallery";
+
+    // Create one client for this gallery page.
+    const galleryDB = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+
+    const uploadForm = document.getElementById("uploadForm");
+    const uploadButton = document.getElementById("uploadButton");
+    const statusBox = document.getElementById("status");
+    const galleryList = document.getElementById("galleryList");
+
+    function showStatus(message, success = false) {
+        statusBox.textContent = message;
+        statusBox.style.color = success ? "#18794e" : "#b42318";
+    }
+
+    async function verifyAdmin() {
+        const {
+            data: { session },
+            error: sessionError
+        } = await galleryDB.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (!session) {
+            throw new Error(
+                "Please sign in through your school admin login first."
+            );
+        }
+
+        const { data: role, error } = await galleryDB
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+
+        if (error) throw error;
+
+        if (!role || role.role !== "admin") {
+            throw new Error("Access denied. Admin permission is required.");
+        }
+
+        return session;
+    }
+
+    async function loadPhotos() {
+        galleryList.replaceChildren();
+
+        const { data, error } = await galleryDB
+            .from("school_gallery")
+            .select("*")
+            .order("display_order", { ascending: true })
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            galleryList.innerHTML =
+                '<p class="empty">No photos uploaded yet.</p>';
+            return;
+        }
+
+        data.forEach(photo => {
+            const { data: publicData } = galleryDB.storage
+                .from(BUCKET)
+                .getPublicUrl(photo.image_path);
+
+            const card = document.createElement("article");
+            card.className = "photo-card";
+
+            const image = document.createElement("img");
+            image.src = publicData.publicUrl;
+            image.alt = photo.title;
+            image.loading = "lazy";
+
+            const info = document.createElement("div");
+            info.className = "photo-info";
+
+            const title = document.createElement("h3");
+            title.textContent = photo.title;
+
+            const category = document.createElement("span");
+            category.className = "category";
+            category.textContent = photo.category;
+
+            const actions = document.createElement("div");
+            actions.className = "photo-actions";
+
+            const activeLabel = document.createElement("label");
+            const activeCheckbox = document.createElement("input");
+            activeCheckbox.type = "checkbox";
+            activeCheckbox.checked = photo.is_active;
+            activeLabel.append(activeCheckbox, "Active");
+
+            activeCheckbox.addEventListener("change", async () => {
+                activeCheckbox.disabled = true;
+
+                try {
+                    const { error } = await galleryDB
+                        .from("school_gallery")
+                        .update({ is_active: activeCheckbox.checked })
+                        .eq("id", photo.id);
+
+                    if (error) throw error;
+
+                    showStatus("Photo visibility updated.", true);
+                } catch (error) {
+                    activeCheckbox.checked = !activeCheckbox.checked;
+                    showStatus("Could not update photo: " + error.message);
+                } finally {
+                    activeCheckbox.disabled = false;
+                }
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "danger";
+            deleteButton.textContent = "Delete";
+
+            deleteButton.addEventListener("click", async () => {
+                if (!confirm("Permanently delete this photo?")) return;
+
+                deleteButton.disabled = true;
+
+                try {
+                    const { error: storageError } = await galleryDB.storage
+                        .from(BUCKET)
+                        .remove([photo.image_path]);
+
+                    if (storageError) throw storageError;
+
+                    const { error: rowError } = await galleryDB
+                        .from("school_gallery")
+                        .delete()
+                        .eq("id", photo.id);
+
+                    if (rowError) throw rowError;
+
+                    showStatus("Photo deleted successfully.", true);
+                    await loadPhotos();
+                } catch (error) {
+                    showStatus("Could not delete photo: " + error.message);
+                    deleteButton.disabled = false;
+                }
+            });
+
+            actions.append(activeLabel, deleteButton);
+            info.append(title, category, actions);
+            card.append(image, info);
+            galleryList.append(card);
+        });
+    }
+
+    uploadForm.addEventListener("submit", async event => {
+        event.preventDefault();
+
+        uploadButton.disabled = true;
+        uploadButton.textContent = "Uploading...";
+        showStatus("");
+
+        let uploadedPath = null;
+
+        try {
+            await verifyAdmin();
+
+            const title = document.getElementById("photoTitle").value.trim();
+            const category = document.getElementById("photoCategory").value;
+            const file = document.getElementById("photoFile").files[0];
+            const order = Number(document.getElementById("photoOrder").value);
+
+            if (!title) throw new Error("Enter a photo title.");
+            if (!file) throw new Error("Choose a photo first.");
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                throw new Error("Choose a JPG, PNG or WebP image.");
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                throw new Error("Photo must be smaller than 5 MB.");
+            }
+
+            if (!Number.isInteger(order) || order < 0) {
+                throw new Error("Display order must be a whole number.");
+            }
+
+            const safeName = file.name.replace(
+                /[^a-zA-Z0-9._-]/g, "_"
+            );
+
+            uploadedPath = `${crypto.randomUUID()}-${safeName}`;
+
+            const { error: uploadError } = await galleryDB.storage
+                .from(BUCKET)
+                .upload(uploadedPath, file, {
+                    cacheControl: "3600",
+                    upsert: false,
+                    contentType: file.type
+                });
+
+            if (uploadError) throw uploadError;
+
+            const { error: insertError } = await galleryDB
+                .from("school_gallery")
+                .insert({
+                    title,
+                    category,
+                    image_path: uploadedPath,
+                    display_order: order,
+                    is_active: true
+                });
+
+            if (insertError) {
+                await galleryDB.storage
+                    .from(BUCKET)
+                    .remove([uploadedPath]);
+
+                uploadedPath = null;
+                throw insertError;
+            }
+
+            uploadForm.reset();
+            document.getElementById("photoOrder").value = 0;
+
+            showStatus("Photo uploaded successfully!", true);
+            await loadPhotos();
+
+        } catch (error) {
+            console.error("Gallery error:", error);
+            showStatus(error.message || "Upload failed.");
+        } finally {
+            uploadButton.disabled = false;
+            uploadButton.textContent = "Upload Photo";
+        }
+    });
+
+    async function startGallery() {
+        try {
+            await verifyAdmin();
+            await loadPhotos();
+        } catch (error) {
+            galleryList.innerHTML =
+                '<p class="empty">Admin access required. Please sign in through the admin login page, then open this page again.</p>';
+
+            showStatus(error.message || "Unable to open gallery.");
+        }
+    }
+
+    startGallery();
+</script>
+</body>
+</html>
