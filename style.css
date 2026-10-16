@@ -949,3 +949,247 @@ footer {
     }
 }
 
+/* JPS Dambal login portal */
+.portal-login {
+    max-width: 850px;
+    margin: 45px auto;
+    padding: 25px 20px;
+    text-align: center;
+}
+
+.portal-login h2 {
+    color: #123c78;
+    margin-bottom: 10px;
+}
+
+.portal-login > p {
+    color: #64748b;
+    margin-bottom: 25px;
+}
+
+.portal-login-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.portal-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 15px;
+    border-radius: 18px;
+    text-decoration: none;
+    background: white;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 6px 20px rgba(20, 50, 90, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.portal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(20, 50, 90, 0.15);
+}
+
+.student-portal {
+    border-top: 4px solid #2878d0;
+}
+
+.admin-portal {
+    border-top: 4px solid #15945b;
+}
+
+.portal-icon {
+    font-size: 32px;
+}
+
+.portal-title {
+    color: #123c78;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.portal-description {
+    color: #64748b;
+    font-size: 13px;
+}
+
+@media (max-width: 520px) {
+    .portal-login-grid {
+        grid-template-columns: 1fr;
+    }
+}
+/* JPS Dambal school login section */
+
+.portal-login {
+    max-width: 1000px;
+    margin: 45px auto;
+    padding: 35px 20px;
+    text-align: center;
+    border-radius: 24px;
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            120deg,
+            rgba(10, 39, 86, 0.88),
+            rgba(25, 104, 160, 0.72)
+        ),
+        url("https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=85");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.portal-login h2 {
+    color: #ffffff;
+    font-size: clamp(24px, 4vw, 34px);
+    font-weight: 800;
+    margin: 0 0 10px;
+}
+
+.portal-login > p {
+    color: #eef6ff;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 25px;
+}
+
+/* Keep both login boxes in one row */
+.portal-login-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Common login box styling */
+.portal-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 14px;
+    min-width: 0;
+    padding: 20px;
+    border-radius: 18px;
+    text-decoration: none;
+
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.portal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+}
+
+.portal-card:focus-visible {
+    outline: 3px solid #ffd166;
+    outline-offset: 4px;
+}
+
+/* Login icons */
+.portal-icon {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 28px;
+    background: #eaf2ff;
+}
+
+.admin-portal .portal-icon {
+    background: #e4f8ec;
+}
+
+/* Login titles */
+.portal-title {
+    display: block;
+    color: #123c78;
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+
+.portal-description {
+    display: block;
+    color: #526274;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 5px;
+}
+
+/* Student box accent */
+.student-portal {
+    border-top: 6px solid #2878d0;
+}
+
+/* Admin box accent */
+.admin-portal {
+    border-top: 6px solid #15945b;
+}
+
+/* Tablet and mobile layout */
+@media (max-width: 600px) {
+    .portal-login {
+        margin: 25px 12px;
+        padding: 25px 12px;
+        border-radius: 18px;
+    }
+
+    .portal-login-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .portal-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 14px 10px;
+        border-radius: 14px;
+    }
+
+    .portal-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 23px;
+    }
+
+    .portal-title {
+        font-size: 14px;
+        overflow-wrap: anywhere;
+    }
+
+    .portal-description {
+        font-size: 11px;
+        overflow-wrap: anywhere;
+    }
+
+    .portal-login > p {
+        font-size: 13px;
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .portal-card {
+        transition: none;
+    }
+
+    .portal-card:hover {
+        transform: none;
+    }
+}
+
