@@ -693,3 +693,259 @@ footer {
     }
 }
 
+/* ==================================
+   JPS ATTRACTIVE SCHOOL SECTION CARDS
+================================== */
+
+.school-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    max-width: 1200px;
+    margin: 35px auto 0;
+}
+
+.school-card {
+    background: #ffffff;
+    border: 1px solid #e8edf5;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(18, 60, 120, 0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.school-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 16px 35px rgba(18, 60, 120, 0.15);
+}
+
+.school-card-image {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: #edf2f8;
+}
+
+.school-card-image img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.school-card:hover .school-card-image img {
+    transform: scale(1.06);
+}
+
+.school-card-badge {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    background: #e9a23b;
+    color: #172b49;
+    padding: 8px 13px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.school-card-content {
+    padding: 24px;
+}
+
+.school-card-content h3 {
+    color: #123c78;
+    font-size: 23px;
+    margin: 0 0 12px;
+}
+
+.school-card-content p {
+    color: #596579;
+    font-size: 15px;
+    line-height: 1.75;
+    margin: 0 0 22px;
+}
+
+.school-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #123c78;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.school-card-link:hover {
+    color: #d58a1f;
+}
+
+.school-card-link:focus-visible {
+    outline: 2px solid #123c78;
+    outline-offset: 4px;
+}
+
+@media (max-width: 900px) {
+    .school-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .school-card-image {
+        height: 200px;
+    }
+}
+
+@media (max-width: 600px) {
+    .school-card-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+        margin-top: 25px;
+    }
+
+    .school-card-image {
+        height: 220px;
+    }
+
+    .school-card-content {
+        padding: 21px;
+    }
+}
+
+/* FIX: JPS School Cards Layout */
+.academics {
+    width: 100%;
+    padding: 70px 5%;
+    box-sizing: border-box;
+}
+
+.academics .section-heading {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 35px;
+    text-align: center;
+}
+
+.school-card-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 35px auto 0;
+    box-sizing: border-box;
+}
+
+.school-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.school-card-image {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+}
+
+.school-card-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.school-card-content {
+    padding: 24px;
+}
+
+@media (max-width: 900px) {
+    .school-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .academics {
+        padding: 45px 5%;
+    }
+
+    .school-card-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    .school-card-image {
+        height: 220px;
+    }
+}
+
+/* FIX: JPS School Cards Layout */
+.academics {
+    width: 100%;
+    padding: 70px 5%;
+    box-sizing: border-box;
+}
+
+.academics .section-heading {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto 35px;
+    text-align: center;
+}
+
+.school-card-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 35px auto 0;
+    box-sizing: border-box;
+}
+
+.school-card {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.school-card-image {
+    width: 100%;
+    height: 220px;
+    overflow: hidden;
+}
+
+.school-card-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.school-card-content {
+    padding: 24px;
+}
+
+@media (max-width: 900px) {
+    .school-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .academics {
+        padding: 45px 5%;
+    }
+
+    .school-card-grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+    }
+
+    .school-card-image {
+        height: 220px;
+    }
+}
+

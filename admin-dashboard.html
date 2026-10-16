@@ -4,893 +4,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JPS Admin Dashboard</title>
-<style>
-  
-* {
-  box-sizing: border-box;
-}
-
-:root {
-  --primary: #164e8a;
-  --primary-hover: #103b6b;
-  --page-bg: #f3f6fb;
-  --text: #243247;
-  --muted: #64748b;
-  --border: #dbe3ee;
-  --card-shadow: 0 4px 16px rgba(15, 40, 75, 0.07);
-}
-
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  background: var(--page-bg);
-  color: var(--text);
-  line-height: 1.5;
-}
-
-header {
-  background: linear-gradient(120deg, #123d72, #1d65a5);
-  color: #fff;
-  padding: 20px max(20px, calc((100% - 1200px) / 2));
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
-}
-
-header strong {
-  font-size: 18px;
-  letter-spacing: 0.3px;
-}
-
-header div div {
-  font-size: 13px;
-  opacity: 0.9;
-  margin-top: 4px;
-}
-
-main {
-  max-width: 1240px;
-  margin: 26px auto;
-  padding: 0 20px;
-}
-
-.welcome,
-.card {
-  background: #fff;
-  padding: 24px;
-  border: 1px solid #e8edf4;
-  border-radius: 14px;
-  margin-bottom: 20px;
-  box-shadow: var(--card-shadow);
-  min-width: 0;
-}
-
-.welcome {
-  border-left: 5px solid var(--primary);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: 20px;
-  align-items: stretch;
-}
-
-h2,
-h3 {
-  color: var(--primary);
-  line-height: 1.3;
-}
-
-h2 {
-  margin-top: 0;
-}
-
-h3 {
-  margin-top: 0;
-}
-
-p {
-  overflow-wrap: anywhere;
-}
-
-label {
-  display: block;
-  margin-top: 14px;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-input,
-select {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 15px;
-  background: #fff;
-  color: var(--text);
-}
-
-input:focus,
-select:focus {
-  outline: 2px solid #93c5fd;
-  border-color: var(--primary);
-}
-
-button {
-  display: inline-block;
-  width: auto;
-  max-width: 100%;
-  padding: 11px 17px;
-  margin-top: 15px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.2s, transform 0.2s;
-}
-
-button:hover:not(:disabled) {
-  background: var(--primary-hover);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-#logout {
-  background: #b42318;
-  margin-top: 0;
-}
-
-#logout:hover:not(:disabled) {
-  background: #8f1d14;
-}
-
-.note,
-.status {
-  font-size: 13px;
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-  white-space: pre-wrap;
-}
-
-.status {
-  font-weight: bold;
-}
-
-.muted {
-  color: var(--muted);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 12px;
-}
-
-th,
-td {
-  border: 1px solid var(--border);
-  padding: 11px;
-  text-align: left;
-}
-
-th {
-  background: #eaf1f8;
-  color: #164e8a;
-}
-
-.hidden {
-  display: none !important;
-}
-
-a.whatsapp {
-  display: inline-block;
-  background: #168d49;
-  color: white;
-  padding: 10px 14px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: bold;
-  margin-top: 8px;
-}
-
-.manage-subjects-btn {
-  display: inline-block;
-  width: auto;
-  padding: 10px 18px;
-  font-size: 14px;
-  margin: 10px 0;
-}
-
-@media (max-width: 600px) {
-  header {
-    padding: 16px;
-  }
-
-  header strong {
-    font-size: 16px;
-  }
-
-  main {
-    margin: 16px auto;
-    padding: 0 12px;
-  }
-
-  .welcome,
-  .card {
-    padding: 17px;
-    border-radius: 11px;
-  }
-
-  .grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-
-  button {
-    padding: 11px 14px;
-  }
-
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-}
-
-</style>
+<title>JPS Dambal | Admin Dashboard</title>
+<link rel="stylesheet" href="admin-dashboard.css">
 </head>
+
 <body>
 <header>
-<div><strong>JNYANABINDU PUBLIC SCHOOL</strong><div>JPS DAMBAL — Administration</div></div>
-<button id="logout" type="button">Sign Out</button>
+  <div><strong>JNYANABINDU PUBLIC SCHOOL</strong><div>JPS DAMBAL — Administration</div></div>
+  <button id="logout" type="button">Sign Out</button>
 </header>
 
 <main>
 <section class="welcome">
-<h2>Admin Dashboard</h2>
-<p id="welcome">Checking your login...</p>
-<p id="message" class="status" role="status"></p>
+  <h2>Admin Dashboard</h2>
+  <p id="welcome">Checking your login...</p>
+  <p id="message" class="status" role="status"></p>
 </section>
 
-<section id="dashboard" class="grid hidden">
+<!-- Colourful dashboard launcher -->
+<section id="dashboardLauncher" class="launcher hidden">
+  <button type="button" class="launch-card blue" data-page="students">
+    <span class="launch-icon">🎓</span><strong>Student Management</strong>
+    <span>Create student accounts and profiles</span>
+  </button>
+  <button type="button" class="launch-card purple" data-page="admins">
+    <span class="launch-icon">🛡️</span><strong>Admin Accounts</strong>
+    <span>Create administrator accounts</span>
+  </button>
+  <button type="button" class="launch-card green" data-page="attendance">
+    <span class="launch-icon">📅</span><strong>Attendance</strong>
+    <span>Record and view student attendance</span>
+  </button>
+  <button type="button" class="launch-card orange" data-page="marks">
+    <span class="launch-icon">📊</span><strong>Marks and Results</strong>
+    <span>Save marks and view student results</span>
+  </button>
+  <button type="button" class="launch-card gold" data-page="fees">
+    <span class="launch-icon">💰</span><strong>Fee Management</strong>
+    <span>Fee management setup</span>
+  </button>
+  <button type="button" class="launch-card teal" data-page="subjects">
+    <span class="launch-icon">📚</span><strong>Manage Subjects</strong>
+    <span>Open subject management</span>
+  </button>
+  <button type="button" class="launch-card indigo" data-page="gallery">
+    <span class="launch-icon">🖼️</span><strong>School Gallery</strong>
+    <span>Manage school photos</span>
+  </button>
+  <button type="button" class="launch-card pink" data-page="enquiries">
+    <span class="launch-icon">📩</span><strong>Website Enquiries</strong>
+    <span>View messages from the website</span>
+  </button>
+  <button type="button" class="launch-card purple" data-page="kindergarten">
+    <span class="launch-icon">🧒</span><strong>Kindergarten Admissions</strong>
+    <span>View admission enquiries</span>
+  </button>
+</section>
 
-<div class="card">
-<h3>Student Management</h3>
-<p>Add a student login and profile.</p>
-<form id="studentForm">
-<label for="studentEmail">Student email</label>
-<input id="studentEmail" type="email" autocomplete="off" required>
-<label for="studentPassword">Temporary password (at least 12 characters)</label>
-<input id="studentPassword" type="password" minlength="12" autocomplete="new-password" required>
-<label for="admissionNumber">Admission number</label>
-<input id="admissionNumber" required placeholder="e.g. JPS001">
-<label for="studentName">Student full name</label>
-<input id="studentName" required>
-<label for="studentClass">Class</label>
-<input id="studentClass" required placeholder="e.g. Class 1">
-<label for="parentName">Parent name (optional)</label>
-<input id="parentName">
-<label for="parentPhone">Parent phone (optional)</label>
-<input id="parentPhone" type="tel">
-<button id="createStudentButton" type="submit">Create Student</button>
-<p id="studentMessage" class="status" role="status"></p>
-</form>
-<p class="note muted">Use a temporary password and share it securely with the student or parent.</p>
-</div>
+<button id="backButton" class="back-button hidden" type="button">← Back to Dashboard</button>
 
-<div class="card">
-<h3>Create Admin Account</h3>
-<p>Only a currently signed-in administrator can create another admin.</p>
-<form id="createAdminForm">
-<label for="newAdminName">Full name</label>
-<input id="newAdminName" required autocomplete="name">
-<label for="newAdminEmail">Email address</label>
-<input id="newAdminEmail" type="email" required autocomplete="email">
-<label for="newAdminPassword">Temporary password (at least 12 characters)</label>
-<input id="newAdminPassword" type="password" minlength="12" required autocomplete="new-password">
-<button id="createAdminButton" type="submit">Create Admin Account</button>
-<p id="createAdminMessage" class="status" role="status"></p>
-</form>
-</div>
+<section id="dashboard" class="hidden">
 
-<div class="card">
-<h3>Attendance</h3>
-<form id="attendanceForm">
-<label for="attendanceStudent">Select student</label>
-<select id="attendanceStudent" required><option value="">Loading students...</option></select>
-<label for="attendanceDate">Attendance date</label>
-<input id="attendanceDate" type="date" required>
-<label for="attendanceStatus">Status</label>
-<select id="attendanceStatus" required>
-<option>Present</option><option>Absent</option><option>Late</option>
-</select>
-<button id="saveAttendanceButton" type="submit">Save Attendance</button>
-<p id="attendanceMessage" class="status" role="status"></p>
-</form>
-<hr>
-<h4>View Attendance Records</h4>
-<label for="attendanceViewDate">Choose date</label>
-<input type="date" id="attendanceViewDate" required>
-<button type="button" id="viewAttendanceButton">View Attendance</button>
-<p id="attendanceViewMessage" class="status" role="status"></p>
-<div id="attendanceRecords">Select a date to view records.</div>
-</div>
+  <div class="card feature-card" data-feature="students">
+    <h3>🎓 Student Management</h3>
+    <p>Add a student login and profile.</p>
+    <form id="studentForm">
+      <label for="studentEmail">Student email</label>
+      <input id="studentEmail" type="email" autocomplete="off" required>
+      <label for="studentPassword">Temporary password (at least 12 characters)</label>
+      <input id="studentPassword" type="password" minlength="12" autocomplete="new-password" required>
+      <label for="admissionNumber">Admission number</label>
+      <input id="admissionNumber" required placeholder="e.g. JPS001">
+      <label for="studentName">Student full name</label>
+      <input id="studentName" required>
+      <label for="studentClass">Class</label>
+      <input id="studentClass" required placeholder="e.g. Class 1">
+      <label for="parentName">Parent name (optional)</label>
+      <input id="parentName">
+      <label for="parentPhone">Parent phone (optional)</label>
+      <input id="parentPhone" type="tel">
+      <button id="createStudentButton" type="submit">Create Student</button>
+      <p id="studentMessage" class="status" role="status"></p>
+    </form>
+    <p class="note muted">Use a temporary password and share it securely with the student or parent.</p>
+  </div>
 
-<div class="card">
-<h3>Marks and Results</h3>
-<form id="marksForm">
-<label for="marksStudent">Select student</label>
-<select id="marksStudent" required><option value="">Loading students...</option></select>
-<label for="examName">Exam name</label>
-<input id="examName" required placeholder="e.g. Unit Test 1">
-<label for="subjectName">Subject</label>
-<select id="subjectName" required>
-  <option value="">Loading subjects...</option>
-</select>
-<label for="marksObtained">Marks obtained</label>
-<input id="marksObtained" type="number" min="0" step="0.01" required>
-<label for="maxMarks">Maximum marks</label>
-<input id="maxMarks" type="number" min="0.01" step="0.01" required>
-<button id="saveMarksButton" type="submit">Save Marks</button>
-<p id="marksMessage" class="status" role="status"></p>
-</form>
-<hr>
-<h4>View Student Results</h4>
-<label for="resultsStudent">Select a student (or all students)</label>
-<select id="resultsStudent"><option value="">All students</option></select>
-<button type="button" id="viewStudentResults">View Results</button>
-<p id="resultsMessage" class="status" role="status"></p>
-<div id="resultsList">Choose a student or view all results.</div>
-</div>
+  <div class="card feature-card" data-feature="admins">
+    <h3>🛡️ Create Admin Account</h3>
+    <p>Only a currently signed-in administrator can create another admin.</p>
+    <form id="createAdminForm">
+      <label for="newAdminName">Full name</label>
+      <input id="newAdminName" required autocomplete="name">
+      <label for="newAdminEmail">Email address</label>
+      <input id="newAdminEmail" type="email" required autocomplete="email">
+      <label for="newAdminPassword">Temporary password (at least 12 characters)</label>
+      <input id="newAdminPassword" type="password" minlength="12" required autocomplete="new-password">
+      <button id="createAdminButton" type="submit">Create Admin Account</button>
+      <p id="createAdminMessage" class="status" role="status"></p>
+    </form>
+  </div>
 
+  <div class="card feature-card" data-feature="attendance">
+    <h3>📅 Attendance</h3>
+    <form id="attendanceForm">
+      <label for="attendanceStudent">Select student</label>
+      <select id="attendanceStudent" required><option value="">Loading students...</option></select>
+      <label for="attendanceDate">Attendance date</label>
+      <input id="attendanceDate" type="date" required>
+      <label for="attendanceStatus">Status</label>
+      <select id="attendanceStatus" required>
+        <option>Present</option><option>Absent</option><option>Late</option>
+      </select>
+      <button id="saveAttendanceButton" type="submit">Save Attendance</button>
+      <p id="attendanceMessage" class="status" role="status"></p>
+    </form>
+    <hr>
+    <h4>View Attendance Records</h4>
+    <label for="attendanceViewDate">Choose date</label>
+    <input type="date" id="attendanceViewDate" required>
+    <button type="button" id="viewAttendanceButton">View Attendance</button>
+    <p id="attendanceViewMessage" class="status" role="status"></p>
+    <div id="attendanceRecords">Select a date to view records.</div>
+  </div>
 
-<div class="card">
-<h3>Fees</h3>
-<p>Track fees, payments and outstanding balances.</p>
-<p class="note muted">Fee management is not connected in this dashboard yet.</p>
-</div>
-<div class="card">
-  <button
-  type="button"
-  class="manage-subjects-btn"
-  onclick="window.location.href='manage-subjects.html'">
-  Manage Subjects
-</button>
-<button
-  type="button"
-  class="manage-subjects-btn"
-  onclick="window.location.href='manage-gallery.html'">
-  Manage School Gallery
-</button>
-</div>
+  <div class="card feature-card" data-feature="marks">
+    <h3>📊 Marks and Results</h3>
+    <form id="marksForm">
+      <label for="marksStudent">Select student</label>
+      <select id="marksStudent" required><option value="">Loading students...</option></select>
+      <label for="examName">Exam name</label>
+      <input id="examName" required placeholder="e.g. Unit Test 1">
+      <label for="subjectName">Subject</label>
+      <select id="subjectName" required><option value="">Loading subjects...</option></select>
+      <label for="marksObtained">Marks obtained</label>
+      <input id="marksObtained" type="number" min="0" step="0.01" required>
+      <label for="maxMarks">Maximum marks</label>
+      <input id="maxMarks" type="number" min="0.01" step="0.01" required>
+      <button id="saveMarksButton" type="submit">Save Marks</button>
+      <p id="marksMessage" class="status" role="status"></p>
+    </form>
+    <hr>
+    <h4>View Student Results</h4>
+    <label for="resultsStudent">Select a student (or all students)</label>
+    <select id="resultsStudent"><option value="">All students</option></select>
+    <button type="button" id="viewStudentResults">View Results</button>
+    <p id="resultsMessage" class="status" role="status"></p>
+    <div id="resultsList">Choose a student or view all results.</div>
+  </div>
 
-<div class="card">
-<h3>Website Enquiries</h3>
-<p>View messages submitted through the school website.</p>
-<button type="button" id="loadEnquiries">Load Enquiries</button>
-<p id="enquiryStatus" class="status" role="status"></p>
-<div id="enquiriesList">Click “Load Enquiries” to view messages.</div>
-</div>
+  <div class="card feature-card" data-feature="fees">
+    <h3>💰 Fee Management</h3>
+    <p>Track fees, payments and outstanding balances.</p>
+    <p class="note muted">Fee management is not connected to Supabase yet. This section is currently a placeholder.</p>
+  </div>
+
+  <div class="card feature-card" data-feature="subjects">
+    <h3>📚 Manage Subjects</h3>
+    <p>Add or manage school subjects.</p>
+    <button type="button" class="manage-subjects-btn" id="openSubjects">Open Subject Management</button>
+  </div>
+
+  <div class="card feature-card" data-feature="gallery">
+    <h3>🖼️ Manage School Gallery</h3>
+    <p>Manage school photos and gallery images.</p>
+    <button type="button" class="manage-subjects-btn" id="openGallery">Open School Gallery</button>
+  </div>
+
+  <div class="card feature-card" data-feature="enquiries">
+    <h3>📩 Website Enquiries</h3>
+    <p>View messages submitted through the school website.</p>
+    <button type="button" id="loadEnquiries">Load Enquiries</button>
+    <p id="enquiryStatus" class="status" role="status"></p>
+    <div id="enquiriesList">Click “Load Enquiries” to view messages.</div>
+  </div>
+
+  <div class="card feature-card" data-feature="kindergarten">
+    <h3>🧒 Kindergarten Admission Enquiries</h3>
+    <p>View parent enquiries for LKG and UKG admissions.</p>
+    <button type="button" id="loadKindergartenEnquiries">Load Admission Enquiries</button>
+    <p id="kgEnquiryStatus" class="status" role="status"></p>
+    <div id="kgEnquiriesList">Click the button to load admission enquiries.</div>
+  </div>
 
 </section>
 </main>
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-const SUPABASE_URL = "https://tjybrmumnxulnqxpsxhi.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_1APbA6E1TJaD0iWNIxojwQ_7fPG3LT7";
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-const $ = (id) => document.getElementById(id);
-const welcome = $("welcome");
-const message = $("message");
-const dashboard = $("dashboard");
-let adminUser = null;
-async function loadActiveSubjects() {
-  const select = $("subjectName");
-  if (!select) return;
-
-  const { data, error } = await supabase
-    .from("school_subjects")
-    .select("name")
-    .eq("is_active", true)
-    .order("name");
-
-  select.replaceChildren(
-    new Option(error ? "Could not load subjects" : "Select a subject", "")
-  );
-
-  if (error) {
-    console.error("Subject loading failed:", error.message);
-    return;
-  }
-
-  (data || []).forEach((subject) => {
-    select.add(new Option(subject.name, subject.name));
-  });
-}
-
-function showStatus(id, text) {
-  $(id).textContent = text || "";
-}
-
-function setBusy(button, busy, busyText, normalText) {
-  button.disabled = busy;
-  button.textContent = busy ? busyText : normalText;
-}
-
-function makeTable(headers, rows) {
-  const table = document.createElement("table");
-  const thead = document.createElement("thead");
-  const tr = document.createElement("tr");
-
-  headers.forEach(h => {
-    const th = document.createElement("th");
-    th.textContent = h;
-    tr.appendChild(th);
-  });
-
-  thead.appendChild(tr);
-  table.appendChild(thead);
-
-  const tbody = document.createElement("tbody");
-  rows.forEach(values => {
-    const row = document.createElement("tr");
-    values.forEach(value => {
-      const td = document.createElement("td");
-      td.textContent = value == null ? "—" : String(value);
-      row.appendChild(td);
-    });
-    tbody.appendChild(row);
-  });
-
-  table.appendChild(tbody);
-  return table;
-}
-
-async function checkAdmin() {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error) throw error;
-
-  if (!user) {
-    welcome.textContent = "You are not signed in.";
-    message.textContent = "Please sign in using your admin account.";
-    const link = document.createElement("a");
-    link.href = "admin-login.html";
-    link.textContent = " Go to Admin Login";
-    message.appendChild(link);
-    return;
-  }
-
-  const { data: roleData, error: roleError } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (roleError) throw roleError;
-
-  if (roleData?.role !== "admin") {
-    welcome.textContent = "Admin access not confirmed.";
-    message.textContent = "This account does not have the admin role.";
-    return;
-  }
-
-  adminUser = user;
-  welcome.textContent = "Welcome, " + (user.email || "Administrator");
-  message.textContent = "Admin access verified successfully.";
-  dashboard.classList.remove("hidden");
-  await Promise.all([
-  loadStudents(),
-  loadAttendanceRecords(),
-  loadActiveSubjects()
-]);
-}
-
-async function invokeUserCreation(body) {
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  if (sessionError) throw sessionError;
-
-  if (!session?.access_token) {
-    throw new Error("Your session expired. Please sign in again.");
-  }
-
-  const { data, error } = await supabase.functions.invoke("manage-school-users", {
-    body,
-    headers: { Authorization: "Bearer " + session.access_token }
-  });
-
-  if (error) {
-    let detail = error.message;
-    if (error.context) {
-      try {
-        const result = await error.context.json();
-        if (result?.error) detail = result.error;
-      } catch {}
-    }
-    throw new Error(detail);
-  }
-
-  if (data?.error) throw new Error(data.error);
-  return data;
-}
-
-async function loadStudents() {
-  const { data, error } = await supabase
-    .from("students")
-    .select("id, full_name, admission_number, class_name")
-    .order("full_name");
-
-  if (error) throw error;
-
-  const students = data || [];
-
-  for (const id of ["attendanceStudent", "marksStudent", "resultsStudent"]) {
-    const select = $(id);
-    select.replaceChildren();
-
-    const placeholder = document.createElement("option");
-    placeholder.value = "";
-    placeholder.textContent = id === "resultsStudent"
-      ? "All students"
-      : (students.length ? "Select a student" : "No students found");
-
-    select.appendChild(placeholder);
-
-    students.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = `${s.full_name} (${s.admission_number || "No admission number"})${s.class_name ? " - " + s.class_name : ""}`;
-      select.appendChild(opt);
-    });
-  }
-}
-
-$("studentForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  showStatus("studentMessage", "");
-
-  if (!adminUser) {
-    return showStatus("studentMessage", "Admin access has not been verified.");
-  }
-
-  const button = $("createStudentButton");
-  setBusy(button, true, "Creating student...", "Create Student");
-
-  try {
-    const body = {
-      email: $("studentEmail").value.trim(),
-      password: $("studentPassword").value,
-      role: "student",
-      admission_number: $("admissionNumber").value.trim(),
-      full_name: $("studentName").value.trim(),
-      class_name: $("studentClass").value.trim(),
-      parent_name: $("parentName").value.trim(),
-      parent_phone: $("parentPhone").value.trim()
-    };
-
-    if (body.password.length < 12) {
-      throw new Error("Password must be at least 12 characters.");
-    }
-
-    await invokeUserCreation(body);
-    showStatus("studentMessage", "Student account and profile created successfully.");
-    $("studentForm").reset();
-    await loadStudents();
-  } catch (err) {
-    showStatus("studentMessage", "Could not create student: " + (err.message || "Unknown error"));
-  } finally {
-    setBusy(button, false, "", "Create Student");
-  }
-});
-
-$("createAdminForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  showStatus("createAdminMessage", "");
-
-  if (!adminUser) {
-    return showStatus("createAdminMessage", "Please sign in with an existing admin account.");
-  }
-
-  const button = $("createAdminButton");
-  setBusy(button, true, "Creating admin...", "Create Admin Account");
-
-  try {
-    const fullName = $("newAdminName").value.trim();
-    const email = $("newAdminEmail").value.trim();
-    const password = $("newAdminPassword").value;
-
-    if (!fullName || !email || password.length < 12) {
-      throw new Error("Enter a name, valid email, and password of at least 12 characters.");
-    }
-
-    await invokeUserCreation({
-      email,
-      password,
-      role: "admin",
-      full_name: fullName
-    });
-
-    showStatus("createAdminMessage", "Admin account created successfully with the admin role.");
-    $("createAdminForm").reset();
-  } catch (err) {
-    showStatus("createAdminMessage", "Could not create admin: " + (err.message || "Unknown error"));
-  } finally {
-    setBusy(button, false, "", "Create Admin Account");
-  }
-});
-
-$("marksForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  showStatus("marksMessage", "");
-
-  const studentId = $("marksStudent").value;
-  const examName = $("examName").value.trim();
-  const subject = $("subjectName").value.trim();
-  const marksObtained = Number($("marksObtained").value);
-  const maxMarks = Number($("maxMarks").value);
-
-  if (!studentId) return showStatus("marksMessage", "Please select a student.");
-
-  if (!examName || !subject || !Number.isFinite(marksObtained) ||
-      !Number.isFinite(maxMarks) || marksObtained < 0 ||
-      maxMarks <= 0 || marksObtained > maxMarks) {
-    return showStatus("marksMessage", "Enter valid marks. Obtained marks cannot exceed maximum marks.");
-  }
-
-  const button = $("saveMarksButton");
-  setBusy(button, true, "Saving...", "Save Marks");
-
-  try {
-    const { error } = await supabase.from("marks").insert({
-      student_id: studentId,
-      exam_name: examName,
-      subject,
-      marks_obtained: marksObtained,
-      max_marks: maxMarks
-    });
-
-    if (error) throw error;
-    showStatus("marksMessage", "Marks saved successfully.");
-    $("marksForm").reset();
-  } catch (err) {
-    showStatus("marksMessage", "Could not save marks: " + err.message);
-  } finally {
-    setBusy(button, false, "", "Save Marks");
-  }
-});
-
-$("viewStudentResults").addEventListener("click", async () => {
-  const studentId = $("resultsStudent").value;
-  showStatus("resultsMessage", "Loading results...");
-  $("resultsList").replaceChildren();
-
-  try {
-    let query = supabase.from("marks")
-      .select("exam_name, subject, marks_obtained, max_marks, student_id, students(full_name, admission_number, class_name)")
-      .order("exam_name");
-
-    if (studentId) query = query.eq("student_id", studentId);
-
-    const { data, error } = await query;
-    if (error) throw error;
-
-    if (!data?.length) {
-      $("resultsList").textContent = "No results found.";
-      showStatus("resultsMessage", "0 results found.");
-      return;
-    }
-
-    const rows = data.map(r => [
-      r.students?.full_name || "Unknown",
-      r.students?.admission_number || "—",
-      r.students?.class_name || "—",
-      r.exam_name,
-      r.subject,
-      `${r.marks_obtained} / ${r.max_marks}`,
-      `${((Number(r.marks_obtained) / Number(r.max_marks)) * 100).toFixed(1)}%`
-    ]);
-
-    $("resultsList").appendChild(makeTable(
-      ["Student", "Admission No.", "Class", "Exam", "Subject", "Marks", "Percentage"],
-      rows
-    ));
-
-    showStatus("resultsMessage", `${data.length} result(s) found.`);
-  } catch (err) {
-    showStatus("resultsMessage", "Could not load results: " + err.message);
-  }
-});
-
-$("attendanceForm").addEventListener("submit", async e => {
-  e.preventDefault();
-  showStatus("attendanceMessage", "");
-
-  const student_id = $("attendanceStudent").value;
-  const attendance_date = $("attendanceDate").value;
-  const status = $("attendanceStatus").value;
-
-  if (!student_id || !attendance_date) {
-    return showStatus("attendanceMessage", "Please select a student and date.");
-  }
-
-  const button = $("saveAttendanceButton");
-  setBusy(button, true, "Saving...", "Save Attendance");
-
-  try {
-    const { error } = await supabase.from("attendance").upsert(
-      { student_id, attendance_date, status },
-      { onConflict: "student_id,attendance_date" }
-    );
-
-    if (error) throw error;
-
-    showStatus("attendanceMessage", "Attendance saved successfully.");
-    await loadAttendanceRecords();
-  } catch (err) {
-    showStatus("attendanceMessage", "Could not save attendance: " + err.message);
-  } finally {
-    setBusy(button, false, "", "Save Attendance");
-  }
-});
-
-async function loadAttendanceRecords() {
-  const date = $("attendanceViewDate").value;
-
-  if (!date) {
-    showStatus("attendanceViewMessage", "Please choose a date.");
-    return;
-  }
-
-  showStatus("attendanceViewMessage", "Loading attendance...");
-  $("attendanceRecords").replaceChildren();
-
-  try {
-    const { data, error } = await supabase.from("attendance")
-      .select("attendance_date,status,students(full_name,admission_number,class_name)")
-      .eq("attendance_date", date)
-      .order("status");
-
-    if (error) throw error;
-
-    if (!data?.length) {
-      $("attendanceRecords").textContent = "No attendance records found for this date.";
-      showStatus("attendanceViewMessage", "0 records found.");
-      return;
-    }
-
-    const rows = data.map(r => [
-      r.students?.full_name || "Unknown",
-      r.students?.admission_number || "—",
-      r.students?.class_name || "—",
-      r.status
-    ]);
-
-    $("attendanceRecords").appendChild(makeTable(
-      ["Student", "Admission No.", "Class", "Status"],
-      rows
-    ));
-
-    showStatus("attendanceViewMessage", `${data.length} record(s) found for ${date}.`);
-  } catch (err) {
-    showStatus("attendanceViewMessage", "Could not load attendance: " + err.message);
-  }
-}
-
-$("viewAttendanceButton").addEventListener("click", loadAttendanceRecords);
-
-$("loadEnquiries").addEventListener("click", async () => {
-  const button = $("loadEnquiries");
-  setBusy(button, true, "Loading...", "Load Enquiries");
-  showStatus("enquiryStatus", "Loading enquiries...");
-  $("enquiriesList").replaceChildren();
-
-  try {
-    const { data, error } = await supabase.from("school_enquiries")
-      .select("id,name,email,phone,subject,message,created_at")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
-
-    if (!data?.length) {
-      $("enquiriesList").textContent = "No enquiries found.";
-      showStatus("enquiryStatus", "0 enquiries found.");
-      return;
-    }
-
-    data.forEach(enquiry => {
-      const card = document.createElement("article");
-      card.style.cssText = "border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin:12px 0";
-
-      const title = document.createElement("h4");
-      title.textContent = enquiry.name || "Unnamed visitor";
-      card.appendChild(title);
-
-      [
-        ["Email", enquiry.email],
-        ["Phone", enquiry.phone],
-        ["Enquiry type", enquiry.subject],
-        ["Message", enquiry.message],
-        ["Submitted", enquiry.created_at ? new Date(enquiry.created_at).toLocaleString() : "Not available"]
-      ].forEach(([label, value]) => {
-        const p = document.createElement("p");
-        p.textContent = `${label}: ${value || "Not provided"}`;
-        p.style.overflowWrap = "anywhere";
-        card.appendChild(p);
-      });
-
-      const phone = (enquiry.phone || "").replace(/\D/g, "");
-      const wa = phone.length === 10 ? "91" + phone : phone;
-
-      if (wa.length >= 10 && wa.length <= 15) {
-        const a = document.createElement("a");
-        a.className = "whatsapp";
-        a.href = "https://wa.me/" + wa + "?text=" + encodeURIComponent(
-          `Hello ${enquiry.name || "Parent"}, thank you for contacting Jnyanabindu Public School, Dambal. We received your enquiry about ${enquiry.subject || "your request"}. How can we help you?`
-        );
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = "💬 Contact on WhatsApp";
-        card.appendChild(a);
-      }
-
-      $("enquiriesList").appendChild(card);
-    });
-
-    showStatus("enquiryStatus", `${data.length} enquiry(s) loaded.`);
-  } catch (err) {
-    showStatus("enquiryStatus", "Could not load enquiries: " + err.message);
-  } finally {
-    setBusy(button, false, "", "Load Enquiries");
-  }
-});
-
-$("logout").addEventListener("click", async () => {
-  const { error } = await supabase.auth.signOut();
-
-  if (error) {
-    message.textContent = error.message;
-    return;
-  }
-
-  window.location.href = "admin-login.html";
-});
-
-const today = new Date();
-const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
-  .toISOString().slice(0, 10);
-
-$("attendanceDate").value = localDate;
-$("attendanceViewDate").value = localDate;
-
-
-checkAdmin().catch(err => {
-  console.error("Admin dashboard error:", err);
-  welcome.textContent = "Could not verify admin access.";
-  message.textContent = "Error: " + (err.message || String(err));
-  dashboard.classList.remove("hidden");
-});
-
-</script>
+<script type="module" src="admin-dashboard.js"></script>
 </body>
 </html>

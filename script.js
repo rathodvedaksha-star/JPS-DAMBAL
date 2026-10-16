@@ -205,3 +205,4 @@ if (heroSection) {
 
     loadSchoolHeroPhotos();
 }
+

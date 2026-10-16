@@ -170,3 +170,1070 @@
         padding: 60px 20px;
     }
 }
+
+/* =====================================
+   JPS KINDERGARTEN — PLAYFUL DESIGN
+===================================== */
+
+.kindergarten-page {
+    --kg-navy: #183b68;
+    --kg-purple: #7955c8;
+    --kg-pink: #ffe5ed;
+    --kg-blue: #e3f2ff;
+    --kg-green: #e5f7df;
+    --kg-orange: #fff0d9;
+    background: #fffdf9;
+}
+
+.kg-section {
+    padding: 75px 6%;
+}
+
+.kg-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 85px 7%;
+    background: linear-gradient(120deg, #fff0d7, #ffe3ef 55%, #e5e8ff);
+}
+
+.kg-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 850px;
+    margin: auto;
+    text-align: center;
+}
+
+.kg-label,
+.kg-small-label {
+    display: inline-block;
+    color: #7955c8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.kg-hero h1 {
+    margin: 20px 0;
+    color: #183b68;
+    font-size: clamp(36px, 5vw, 64px);
+    line-height: 1.15;
+}
+
+.kg-hero h1 span {
+    display: block;
+    color: #e75e91;
+}
+
+.kg-hero-content > p {
+    max-width: 650px;
+    margin: 0 auto 28px;
+    color: #4f5c70;
+    font-size: 18px;
+    line-height: 1.8;
+}
+
+.kg-hero-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.kg-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 22px;
+    border-radius: 30px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.kg-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 18px #183b6820;
+}
+
+.kg-btn-primary {
+    background: #7955c8;
+    color: #ffffff;
+}
+
+.kg-btn-light {
+    background: #ffffff;
+    color: #183b68;
+    border: 1px solid #e5d9ff;
+}
+
+.kg-hero-features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.kg-hero-features span {
+    padding: 10px 15px;
+    background: #ffffffb8;
+    border: 1px solid #ffffff;
+    border-radius: 30px;
+    color: #34435b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.kg-hero-decoration span {
+    position: absolute;
+    font-size: 38px;
+    opacity: 0.8;
+}
+
+.kg-hero-decoration span:nth-child(1) {
+    left: 7%;
+    top: 14%;
+}
+
+.kg-hero-decoration span:nth-child(2) {
+    right: 10%;
+    top: 15%;
+}
+
+.kg-hero-decoration span:nth-child(3) {
+    left: 12%;
+    bottom: 12%;
+}
+
+.kg-hero-decoration span:nth-child(4) {
+    right: 8%;
+    bottom: 12%;
+}
+
+.kg-section-heading {
+    max-width: 760px;
+    margin: 0 auto 38px;
+    text-align: center;
+}
+
+.kg-section-heading h2,
+.kg-care h2 {
+    margin: 14px 0;
+    color: #183b68;
+    font-size: clamp(27px, 3vw, 40px);
+    line-height: 1.25;
+}
+
+.kg-section-heading > p,
+.kg-care-content > p {
+    color: #626d7c;
+    font-size: 16px;
+    line-height: 1.8;
+}
+
+.kg-benefit-grid,
+.kg-activity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    max-width: 1150px;
+    margin: auto;
+}
+
+.kg-benefit {
+    padding: 28px;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.kg-pink { background: #fff0f4; }
+.kg-blue { background: #edf6ff; }
+.kg-green { background: #eff9e9; }
+
+.kg-icon {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+.kg-benefit h3,
+.kg-activity-card h3 {
+    color: #183b68;
+    font-size: 20px;
+    margin: 8px 0;
+}
+
+.kg-benefit p,
+.kg-activity-card p {
+    color: #596579;
+    font-size: 14px;
+    line-height: 1.75;
+    margin-bottom: 0;
+}
+
+.kg-classes {
+    background: #f7f5ff;
+}
+
+.kg-class-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+    max-width: 1000px;
+    margin: auto;
+}
+
+.kg-class-card {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #eae6f5;
+    border-radius: 22px;
+    box-shadow: 0 8px 25px #283b6810;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.kg-class-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px #283b681c;
+}
+
+.kg-class-illustration {
+    position: relative;
+    height: 245px;
+    overflow: hidden;
+    background: #ffe8ef;
+}
+
+.kg-class-illustration img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.kg-class-tag {
+    position: absolute;
+    left: 18px;
+    bottom: 16px;
+    padding: 9px 18px;
+    background: #ffffff;
+    color: #7955c8;
+    border-radius: 25px;
+    font-weight: 800;
+}
+
+.kg-class-content {
+    padding: 28px;
+}
+
+.kg-class-content h3 {
+    color: #183b68;
+    font-size: 25px;
+    margin: 10px 0;
+}
+
+.kg-class-content > p {
+    color: #626d7c;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+.kg-class-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 22px 0;
+}
+
+.kg-class-content li {
+    margin: 12px 0;
+    color: #435169;
+    font-size: 14px;
+}
+
+.kg-text-link {
+    display: inline-block;
+    color: #7955c8;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.kg-text-link:hover {
+    color: #d94e83;
+}
+
+.kg-activity-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.kg-activity-card {
+    padding: 25px 20px;
+    border-radius: 18px;
+    text-align: center;
+    transition: transform 0.25s;
+}
+
+.kg-activity-card:hover {
+    transform: translateY(-5px);
+}
+
+.activity-orange { background: #fff0dc; }
+.activity-purple { background: #f0eaff; }
+.activity-green { background: #eaf7e5; }
+.activity-blue { background: #e7f3ff; }
+
+.kg-activity-icon {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.kg-care {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    align-items: center;
+    gap: 50px;
+    padding: 75px 8%;
+}
+
+.kg-care-content > p {
+    margin-bottom: 28px;
+}
+
+.kg-care-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin: 22px 0;
+}
+
+.kg-care-item > span {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 50px;
+    height: 50px;
+    background: #f0eaff;
+    border-radius: 15px;
+    font-size: 25px;
+}
+
+.kg-care-item h3 {
+    color: #183b68;
+    margin: 2px 0 6px;
+}
+
+.kg-care-item p {
+    color: #626d7c;
+    margin: 0;
+    line-height: 1.7;
+    font-size: 14px;
+}
+
+.kg-care-art {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 350px;
+    padding: 30px;
+    background: linear-gradient(145deg, #fff0d7, #ffe4ef, #e9e5ff);
+    border-radius: 45% 45% 25px 25px;
+    text-align: center;
+}
+
+.kg-sun {
+    font-size: 55px;
+}
+
+.kg-rainbow {
+    font-size: 95px;
+    margin: 10px 0;
+}
+
+.kg-flowers {
+    font-size: 32px;
+}
+
+.kg-care-art > p {
+    color: #7955c8;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.kg-admission {
+    padding: 65px 6%;
+    background: linear-gradient(120deg, #7955c8, #a16cda);
+    text-align: center;
+}
+
+.kg-admission-content {
+    max-width: 760px;
+    margin: auto;
+}
+
+.kg-admission-content > span {
+    color: #ffedb9;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.kg-admission h2 {
+    color: #ffffff;
+    font-size: clamp(28px, 4vw, 42px);
+    margin: 18px 0;
+    line-height: 1.3;
+}
+
+.kg-admission p {
+    color: #f6efff;
+    line-height: 1.8;
+    margin-bottom: 26px;
+}
+
+.kg-btn-admission {
+    background: #ffffff;
+    color: #7955c8;
+}
+
+.kg-explore-links {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.kg-explore-links a {
+    padding: 15px 20px;
+    border: 1px solid #e7e0f5;
+    border-radius: 14px;
+    background: #ffffff;
+    color: #183b68;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.kg-explore-links a:hover {
+    background: #f4efff;
+}
+
+@media (max-width: 900px) {
+    .kg-benefit-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .kg-activity-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .kg-care {
+        grid-template-columns: 1fr;
+    }
+
+    .kg-care-art {
+        min-height: 280px;
+    }
+}
+
+@media (max-width: 600px) {
+    .kg-section {
+        padding: 48px 5%;
+    }
+
+    .kg-hero {
+        padding: 65px 5%;
+    }
+
+    .kg-hero-decoration span {
+        font-size: 25px;
+    }
+
+    .kg-hero-content > p {
+        font-size: 16px;
+    }
+
+    .kg-hero-buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .kg-hero-features {
+        gap: 8px;
+    }
+
+    .kg-benefit-grid,
+    .kg-class-grid,
+    .kg-activity-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .kg-class-illustration {
+        height: 215px;
+    }
+
+    .kg-class-content {
+        padding: 22px;
+    }
+
+    .kg-care {
+        padding: 48px 6%;
+        gap: 25px;
+    }
+
+    .kg-care-art {
+        min-height: 250px;
+    }
+
+    .kg-admission {
+        padding: 48px 6%;
+    }
+
+    .kg-explore-links {
+        flex-direction: column;
+    }
+
+    .kg-explore-links a {
+        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kg-btn,
+    .kg-class-card,
+    .kg-activity-card {
+        transition: none;
+    }
+}
+
+/* Kindergarten teachers and facilities */
+.kg-care {
+    align-items: center;
+    gap: 45px;
+}
+
+.kg-care-content {
+    min-width: 0;
+}
+
+.kg-care-item {
+    padding: 12px;
+    border-radius: 14px;
+    transition: background 0.2s ease;
+}
+
+.kg-care-item:hover {
+    background: #f7f2ff;
+}
+
+.kg-care-item h3 {
+    font-size: 17px;
+}
+
+.kg-care-item p {
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.kg-care-content > .kg-btn {
+    margin-top: 18px;
+}
+
+.kg-facility-panel {
+    min-width: 0;
+    padding: 30px;
+    background: linear-gradient(145deg, #fff0df, #ffe8f1 55%, #eee8ff);
+    border: 1px solid #f4ddec;
+    border-radius: 28px;
+}
+
+.kg-facility-heading {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.kg-facility-heading > span {
+    display: inline-grid;
+    place-items: center;
+    width: 65px;
+    height: 65px;
+    border-radius: 22px;
+    background: #ffffff;
+    font-size: 35px;
+}
+
+.kg-facility-heading h3 {
+    color: #183b68;
+    font-size: 23px;
+    margin: 16px 0 8px;
+}
+
+.kg-facility-heading p {
+    color: #626d7c;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.kg-facility-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.kg-facility-card {
+    padding: 22px 12px;
+    border-radius: 18px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.kg-facility-card:hover {
+    transform: translateY(-4px);
+}
+
+.kg-facility-card > span {
+    font-size: 34px;
+}
+
+.kg-facility-card h4 {
+    color: #183b68;
+    font-size: 15px;
+    margin: 12px 0 6px;
+}
+
+.kg-facility-card p {
+    color: #596579;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.facility-pink {
+    background: #fff0f4;
+}
+
+.facility-blue {
+    background: #eaf4ff;
+}
+
+.facility-yellow {
+    background: #fff5d9;
+}
+
+.facility-green {
+    background: #eaf8e5;
+}
+
+.kg-facility-note {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 16px;
+    background: #ffffffbd;
+    border-radius: 14px;
+}
+
+.kg-facility-note > span {
+    font-size: 25px;
+}
+
+.kg-facility-note p {
+    margin: 0;
+    color: #45546b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .kg-care {
+        grid-template-columns: 1fr;
+    }
+
+    .kg-facility-panel {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 480px) {
+    .kg-facility-panel {
+        padding: 20px;
+    }
+
+    .kg-facility-grid {
+        gap: 10px;
+    }
+
+    .kg-facility-card {
+        padding: 18px 8px;
+    }
+
+    .kg-facility-card h4 {
+        font-size: 14px;
+    }
+}
+
+/* Kindergarten teachers and facilities */
+.kg-care {
+    align-items: center;
+    gap: 45px;
+}
+
+.kg-care-content {
+    min-width: 0;
+}
+
+.kg-care-item {
+    padding: 12px;
+    border-radius: 14px;
+    transition: background 0.2s ease;
+}
+
+.kg-care-item:hover {
+    background: #f7f2ff;
+}
+
+.kg-care-item h3 {
+    font-size: 17px;
+}
+
+.kg-care-item p {
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.kg-care-content > .kg-btn {
+    margin-top: 18px;
+}
+
+.kg-facility-panel {
+    min-width: 0;
+    padding: 30px;
+    background: linear-gradient(145deg, #fff0df, #ffe8f1 55%, #eee8ff);
+    border: 1px solid #f4ddec;
+    border-radius: 28px;
+}
+
+.kg-facility-heading {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.kg-facility-heading > span {
+    display: inline-grid;
+    place-items: center;
+    width: 65px;
+    height: 65px;
+    border-radius: 22px;
+    background: #ffffff;
+    font-size: 35px;
+}
+
+.kg-facility-heading h3 {
+    color: #183b68;
+    font-size: 23px;
+    margin: 16px 0 8px;
+}
+
+.kg-facility-heading p {
+    color: #626d7c;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.kg-facility-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.kg-facility-card {
+    padding: 22px 12px;
+    border-radius: 18px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.kg-facility-card:hover {
+    transform: translateY(-4px);
+}
+
+.kg-facility-card > span {
+    font-size: 34px;
+}
+
+.kg-facility-card h4 {
+    color: #183b68;
+    font-size: 15px;
+    margin: 12px 0 6px;
+}
+
+.kg-facility-card p {
+    color: #596579;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.facility-pink {
+    background: #fff0f4;
+}
+
+.facility-blue {
+    background: #eaf4ff;
+}
+
+.facility-yellow {
+    background: #fff5d9;
+}
+
+.facility-green {
+    background: #eaf8e5;
+}
+
+.kg-facility-note {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    padding: 16px;
+    background: #ffffffbd;
+    border-radius: 14px;
+}
+
+.kg-facility-note > span {
+    font-size: 25px;
+}
+
+.kg-facility-note p {
+    margin: 0;
+    color: #45546b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .kg-care {
+        grid-template-columns: 1fr;
+    }
+
+    .kg-facility-panel {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@media (max-width: 480px) {
+    .kg-facility-panel {
+        padding: 20px;
+    }
+
+    .kg-facility-grid {
+        gap: 10px;
+    }
+
+    .kg-facility-card {
+        padding: 18px 8px;
+    }
+
+    .kg-facility-card h4 {
+        font-size: 14px;
+    }
+}
+
+/* Kindergarten admission enquiry form */
+
+.kg-admission {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    align-items: center;
+    gap: 40px;
+    padding: 65px 6%;
+    background: linear-gradient(135deg, #7955c8, #a16cda);
+}
+
+.kg-admission-content {
+    max-width: 480px;
+    margin: auto;
+}
+
+.kg-admission-content > span {
+    color: #ffedb9;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.kg-admission-content h2 {
+    color: #ffffff;
+    font-size: clamp(29px, 3.5vw, 42px);
+    line-height: 1.3;
+    margin: 18px 0;
+}
+
+.kg-admission-content > p {
+    color: #f6efff;
+    line-height: 1.8;
+}
+
+.kg-admission-form-card {
+    width: 100%;
+    max-width: 680px;
+    box-sizing: border-box;
+    margin: auto;
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 22px;
+    box-shadow: 0 15px 40px #35205c30;
+}
+
+.kg-form-heading {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.kg-form-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 55px;
+    height: 55px;
+    background: #fff0d9;
+    border-radius: 16px;
+    font-size: 29px;
+}
+
+.kg-form-heading h3 {
+    color: #183b68;
+    font-size: 22px;
+    margin: 0 0 6px;
+}
+
+.kg-form-heading p {
+    color: #687386;
+    font-size: 13px;
+    margin: 0;
+}
+
+.kg-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.kg-form-field {
+    min-width: 0;
+}
+
+.kg-form-full {
+    grid-column: 1 / -1;
+}
+
+.kg-form-field label {
+    display: block;
+    color: #34435b;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.kg-form-field input,
+.kg-form-field select,
+.kg-form-field textarea {
+    display: block;
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #dce2ec;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #27364b;
+    font: inherit;
+    font-size: 14px;
+}
+
+.kg-form-field textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.kg-form-field input:focus,
+.kg-form-field select:focus,
+.kg-form-field textarea:focus {
+    outline: 2px solid #b8a0ef;
+    outline-offset: 1px;
+    border-color: #7955c8;
+}
+
+.kg-form-privacy {
+    margin: 18px 0;
+    color: #687386;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.kg-form-submit {
+    width: 100%;
+    padding: 15px 20px;
+    border: none;
+    border-radius: 12px;
+    background: #7955c8;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.kg-form-submit:hover {
+    background: #6240ac;
+}
+
+.kg-form-submit:disabled {
+    opacity: 0.65;
+    cursor: wait;
+}
+
+.kg-admission-message {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+    .kg-admission {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .kg-admission-content {
+        text-align: center;
+    }
+}
+
+@media (max-width: 600px) {
+    .kg-admission {
+        padding: 45px 5%;
+    }
+
+    .kg-admission-form-card {
+        padding: 22px 18px;
+    }
+
+    .kg-form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .kg-form-full {
+        grid-column: auto;
+    }
+
+    .kg-form-heading h3 {
+        font-size: 19px;
+    }
+}
+
