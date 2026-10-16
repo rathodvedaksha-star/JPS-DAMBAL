@@ -639,3 +639,57 @@ footer {
         padding: 42px 5%;
     }
 }
+
+/* Hero slideshow manual navigation */
+.hero {
+    position: relative;
+}
+
+.hero-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    background: rgba(10, 35, 70, 0.65);
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.hero-arrow:hover {
+    background: #e9a23b;
+    transform: translateY(-50%) scale(1.08);
+}
+
+.hero-prev {
+    left: 20px;
+}
+
+.hero-next {
+    right: 20px;
+}
+
+@media (max-width: 600px) {
+    .hero-arrow {
+        width: 36px;
+        height: 36px;
+        font-size: 19px;
+    }
+
+    .hero-prev {
+        left: 10px;
+    }
+
+    .hero-next {
+        right: 10px;
+    }
+}
+

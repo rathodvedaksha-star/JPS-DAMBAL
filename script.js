@@ -116,7 +116,10 @@ contactForm.addEventListener("submit", async event => {
 });
 
  // JPS Hero Slideshow — Load photos from Supabase
+
 const heroSection = document.querySelector(".hero");
+const heroPrev = document.getElementById("heroPrev");
+const heroNext = document.getElementById("heroNext");
 
 if (heroSection) {
     const heroFallbackPhotos = [
@@ -127,16 +130,44 @@ if (heroSection) {
 
     let heroPhotos = [...heroFallbackPhotos];
     let currentHeroPhoto = 0;
+    let heroTimer;
 
     function showHeroPhoto(index) {
+        currentHeroPhoto =
+            (index + heroPhotos.length) % heroPhotos.length;
+
         heroSection.style.backgroundImage = `
             linear-gradient(
                 90deg,
-                rgba(5, 25, 55, 0.88),
-                rgba(5, 25, 55, 0.35)
+                rgba(5, 25, 55, 0.78),
+                rgba(5, 25, 55, 0.25)
             ),
-            url("${heroPhotos[index]}")
+            url("${heroPhotos[currentHeroPhoto]}")
         `;
+    }
+
+    function startHeroTimer() {
+        clearInterval(heroTimer);
+
+        if (heroPhotos.length > 1) {
+            heroTimer = setInterval(() => {
+                showHeroPhoto(currentHeroPhoto + 1);
+            }, 5000);
+        }
+    }
+
+    if (heroPrev) {
+        heroPrev.addEventListener("click", () => {
+            showHeroPhoto(currentHeroPhoto - 1);
+            startHeroTimer();
+        });
+    }
+
+    if (heroNext) {
+        heroNext.addEventListener("click", () => {
+            showHeroPhoto(currentHeroPhoto + 1);
+            startHeroTimer();
+        });
     }
 
     async function loadSchoolHeroPhotos() {
@@ -151,7 +182,7 @@ if (heroSection) {
             if (error) throw error;
 
             if (data && data.length > 0) {
-                heroPhotos = data.map(photo => {
+                const galleryPhotos = data.map(photo => {
                     const { data: imageData } = supabase.storage
                         .from("school-gallery")
                         .getPublicUrl(photo.image_path);
@@ -159,24 +190,17 @@ if (heroSection) {
                     return imageData.publicUrl;
                 });
 
-                currentHeroPhoto = 0;
-                showHeroPhoto(currentHeroPhoto);
-            } else {
-                showHeroPhoto(currentHeroPhoto);
+                heroPhotos = [...new Set(galleryPhotos.filter(Boolean))];
             }
         } catch (error) {
-            console.error("Could not load school gallery photos:", error);
-            showHeroPhoto(currentHeroPhoto);
+            console.error(
+                "Could not load school gallery photos:",
+                error
+            );
         }
 
-        if (heroPhotos.length > 1) {
-            setInterval(() => {
-                currentHeroPhoto =
-                    (currentHeroPhoto + 1) % heroPhotos.length;
-
-                showHeroPhoto(currentHeroPhoto);
-            }, 5000);
-        }
+        showHeroPhoto(0);
+        startHeroTimer();
     }
 
     loadSchoolHeroPhotos();
