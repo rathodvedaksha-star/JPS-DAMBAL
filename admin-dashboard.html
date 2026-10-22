@@ -6,6 +6,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>JPS Dambal | Admin Dashboard</title>
 <link rel="stylesheet" href="admin-dashboard.css">
+<style>
+.fee-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.fee-summary{background:#f1f5f9;border:1px solid #dbe3ed;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.fee-summary span{font-size:.9rem;color:#475569}.fee-summary strong{font-size:1.35rem;color:#0f172a}
+.fee-form-grid,.fee-filter-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;align-items:end}
+.fee-form-heading{grid-column:1/-1;margin-bottom:0}.fee-form-actions{display:flex;gap:8px;flex-wrap:wrap}.secondary-button{background:#64748b}
+.fee-record{border:1px solid #dbe3ed;border-radius:12px;padding:14px;margin:12px 0;overflow-wrap:anywhere}
+.fee-record-header{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.fee-badge{display:inline-block;border-radius:999px;padding:4px 9px;font-size:.8rem;font-weight:700;background:#e2e8f0;color:#334155}
+.fee-badge.paid{background:#dcfce7;color:#166534}.fee-badge.pending,.fee-badge.overdue{background:#fee2e2;color:#991b1b}.fee-badge.partially_paid{background:#fef3c7;color:#92400e}
+.fee-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.fee-actions button,.fee-actions a{font:inherit;border:0;border-radius:7px;padding:8px 10px;cursor:pointer;text-decoration:none;display:inline-block;background:#e2e8f0;color:#0f172a}
+.fee-actions .fee-edit{background:#dbeafe}.fee-actions .fee-whatsapp{background:#dcfce7}.fee-actions .fee-sms{background:#fef3c7}.fee-actions .fee-call{background:#ede9fe}
+.fee-detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:10px}.fee-detail-grid div{padding:8px;background:#f8fafc;border-radius:8px}.fee-detail-grid small{display:block;color:#64748b}
+@media(max-width:600px){.fee-form-grid,.fee-filter-grid{grid-template-columns:1fr}}
+/* Safe fee-form layout: each label and field appears on its own row. */
+#feeForm.fee-form-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;align-items:stretch}
+#feeForm .fee-form-heading,#feeForm .fee-form-actions,#feeForm #feeMessage{grid-column:1/-1}
+#feeForm>label{display:block;margin:8px 0 0;grid-column:1/-1}
+#feeForm>input:not([type="hidden"],#feeEditId),#feeForm>select{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;margin-top:0}
+#feeForm .fee-form-actions{display:flex;gap:8px;flex-wrap:wrap}
+#feeForm #feeMessage{margin-top:4px}
+</style>
 </head>
 
 <body>
@@ -187,8 +209,61 @@
 
   <div class="card feature-card" data-feature="fees">
     <h3>💰 Fee Management</h3>
-    <p>Track fees, payments and outstanding balances.</p>
-    <p class="note muted">Fee management is not connected to Supabase yet. This section is currently a placeholder.</p>
+    <p>Manage student fees, track balances, and contact parents about pending fees.</p>
+
+    <div class="fee-summary-grid">
+      <div class="fee-summary"><span>Total fees</span><strong id="feeTotalAmount">₹0.00</strong></div>
+      <div class="fee-summary"><span>Collected</span><strong id="feeCollectedAmount">₹0.00</strong></div>
+      <div class="fee-summary"><span>Balance pending</span><strong id="feePendingAmount">₹0.00</strong></div>
+      <div class="fee-summary"><span>Overdue records</span><strong id="feeOverdueCount">0</strong></div>
+    </div>
+
+    <form id="feeForm" class="fee-form-grid">
+      <input id="feeEditId" type="hidden">
+      <h4 id="feeFormHeading" class="fee-form-heading">Add Fee Record</h4>
+      <label for="feeStudent">Student</label>
+      <select id="feeStudent" required><option value="">Loading students...</option></select>
+      <label for="feeDescription">Fee description</label>
+      <input id="feeDescription" required placeholder="e.g. Tuition Fee - Term 1">
+      <label for="feeAmount">Total fee (₹)</label>
+      <input id="feeAmount" type="number" min="0.01" step="0.01" required>
+      <label for="feeAmountPaid">Amount paid (₹)</label>
+      <input id="feeAmountPaid" type="number" min="0" step="0.01" value="0" required>
+      <label for="feeDueDate">Due date (optional)</label>
+      <input id="feeDueDate" type="date">
+      <label for="feeStatus">Status</label>
+      <select id="feeStatus" required>
+        <option value="pending">Pending</option>
+        <option value="partially_paid">Partially Paid</option>
+        <option value="paid">Paid</option>
+        <option value="overdue">Overdue</option>
+      </select>
+      <div class="fee-form-actions">
+        <button id="saveFeeButton" type="submit">Save Fee</button>
+        <button id="cancelFeeEditButton" type="button" class="secondary-button hidden">Cancel Edit</button>
+      </div>
+      <p id="feeMessage" class="status" role="status"></p>
+    </form>
+
+    <hr>
+    <h3>Student Fee Records</h3>
+    <div class="fee-filter-grid">
+      <div><label for="feeClassFilter">Filter by class</label><select id="feeClassFilter"><option value="">All classes</option></select></div>
+      <div><label for="feeStatusFilter">Filter by payment status</label>
+        <select id="feeStatusFilter">
+          <option value="">All statuses</option>
+          <option value="pending">Pending</option>
+          <option value="paid">Paid</option>
+          <option value="partially_paid">Partially Paid</option>
+          <option value="overdue">Overdue</option>
+        </select>
+      </div>
+      <div><label for="feeSearch">Search student / admission number</label><input id="feeSearch" placeholder="Type a name or admission number"></div>
+    </div>
+    <button type="button" id="loadFeesButton">Refresh Fee Records</button>
+    <p id="feeRecordsMessage" class="status" role="status"></p>
+    <div id="feeRecords">Click “Refresh Fee Records” to load fee records.</div>
+    <p class="note muted">WhatsApp, SMS, and call actions open your device's messaging or phone app. They do not send messages automatically. Payment history here reflects fields currently stored in the fees table; individual transaction history requires a separate payment-history table.</p>
   </div>
 
   <div class="card feature-card" data-feature="subjects">
