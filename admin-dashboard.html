@@ -113,14 +113,47 @@
       <input id="attendanceDate" type="date" required>
       <label for="attendanceStatus">Status</label>
       <select id="attendanceStatus" required>
-        <option>Present</option><option>Absent</option><option>Late</option>
+        <option>Present</option><option>Absent</option>
       </select>
       <button id="saveAttendanceButton" type="submit">Save Attendance</button>
       <p id="attendanceMessage" class="status" role="status"></p>
-    </form>
-    <hr>
-    <h4>View Attendance Records</h4>
+    
+</form>
+
+<hr>
+
+<h4>🏫 Mark Whole-Class Attendance</h4>
+
+<label for="attendanceClass">Select class</label>
+<select id="attendanceClass" required>
+  <option value="">Select a class</option>
+</select>
+
+<label for="classAttendanceDate">Attendance date</label>
+<input type="date" id="classAttendanceDate" required>
+
+<button type="button" id="loadClassAttendanceButton">
+  Load Students
+</button>
+
+<p id="classAttendanceMessage" class="status" role="status"></p>
+
+<div id="classAttendanceList">
+  Select a class and date, then click Load Students.
+</div>
+
+<button type="button" id="saveClassAttendanceButton">
+  Save Whole-Class Attendance
+</button>
+
+<hr>
+
+<h4>View Attendance Records</h4>
     <label for="attendanceViewDate">Choose date</label>
+    <label for="attendanceViewClass">Choose class</label>
+<select id="attendanceViewClass">
+  <option value="">All classes</option>
+</select>
     <input type="date" id="attendanceViewDate" required>
     <button type="button" id="viewAttendanceButton">View Attendance</button>
     <p id="attendanceViewMessage" class="status" role="status"></p>

@@ -55,3 +55,30 @@ a.whatsapp{display:inline-block;background:#168d49;color:white;padding:10px 14px
  .launch-card{min-height:125px}
  table{display:block;overflow-x:auto;white-space:nowrap}
 }
+.attendance-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.attendance-choice {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.attendance-choice:first-child.selected {
+  background: #198754;
+  color: white;
+  border-color: #198754;
+}
+
+.attendance-choice:last-child.selected {
+  background: #dc3545;
+  color: white;
+  border-color: #dc3545;
+}

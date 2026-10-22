@@ -1416,6 +1416,7 @@ background:
         transform: none;
     }
 }
-
-
-
+*.subject-card{
+    background-image:url(JPS\ Dambal.jpg);
+    background-size: cover;
+}
