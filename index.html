@@ -117,19 +117,40 @@
             <p>Board Curriculum</p>
         </div>
     </section>
-    <div>
-<a href="student-dashboard.html" class="portal-card student-portal">
-    <span class="portal-icon">🎓</span>
-    <span class="portal-title">Student Login</span>
-    <span class="portal-description">Access your student details</span>
-</a>
 
-<a href="admin-login.html" class="portal-card admin-portal">
-    <span class="portal-icon">🛡️</span>
-    <span class="portal-title">Admin Login</span>
-    <span class="portal-description">Manage school records</span>
-</a>
-</div>
+    <!-- LATEST SCHOOL NOTICES -->
+<section class="section" id="latest-notices" style="
+    background:
+        linear-gradient(
+            rgba(7, 65, 42, 0.94),
+            rgba(7, 65, 42, 0.94)
+        ),
+        repeating-linear-gradient(
+            45deg,
+            #176b48 0px,
+            #176b48 2px,
+            #125b3d 2px,
+            #125b3d 4px
+        );
+    border: 12px solid #9b6536;
+    border-radius: 8px;
+    box-shadow:
+        inset 0 0 0 3px #c99a62,
+        0 6px 18px rgba(0, 0, 0, 0.2);
+    padding: 48px 20px;
+">
+        <div style="max-width:1100px;margin:auto;">
+        <div class="section-heading">
+          <span class="section-label">STAY INFORMED</span>
+          <h2>Latest School Notices</h2>
+          <p>Important announcements for students and parents, with the newest published notice first.</p>
+        </div>
+        <div id="homeNoticeStatus" role="status" aria-live="polite" style="padding:16px;text-align:center;color:#64748b;">Loading latest notices…</div>
+        <div id="homeNoticeList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:16px;"></div>
+        <div style="text-align:center;margin-top:24px;"><button type="button" id="refreshHomeNotices" class="btn primary-btn">Refresh Notices</button></div>
+      </div>
+    </section>
+
     <!-- ABOUT SCHOOL -->
     <section class="section about" id="about">
 
@@ -456,6 +477,8 @@
 
     <!-- JavaScript MODULE FOR SUPABASE -->
     <script type="module" src="script.js"></script>
+    <script type="module" src="home-notices.js"></script>
+    <script type="module" src="home-notices.js"></script>
 
 </body>
 </html>

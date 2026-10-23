@@ -73,6 +73,10 @@
     <span class="launch-icon">🖼️</span><strong>School Gallery</strong>
     <span>Manage school photos</span>
   </button>
+  <button type="button" class="launch-card blue" data-page="notices">
+    <span class="launch-icon">📢</span><strong>Manage Notices</strong>
+    <span>Publish announcements on the homepage</span>
+  </button>
   <button type="button" class="launch-card pink" data-page="enquiries">
     <span class="launch-icon">📩</span><strong>Website Enquiries</strong>
     <span>View messages from the website</span>
@@ -276,6 +280,35 @@
     <h3>🖼️ Manage School Gallery</h3>
     <p>Manage school photos and gallery images.</p>
     <button type="button" class="manage-subjects-btn" id="openGallery">Open School Gallery</button>
+  </div>
+
+  <div class="card feature-card" data-feature="notices">
+    <h3>📢 Manage School Notices</h3>
+    <p>Create notices for holidays, exams, events, admissions, sports, or general announcements. The newest published notice appears first on the homepage.</p>
+    <form id="noticeForm">
+      <input type="hidden" id="noticeEditId">
+      <label for="noticeTitle">Notice title</label>
+      <input id="noticeTitle" maxlength="160" required placeholder="e.g. School holiday on Monday">
+      <label for="noticeCategory">Category</label>
+      <select id="noticeCategory" required>
+        <option>General</option><option>Holidays</option><option>Exams</option><option>Events</option><option>Admissions</option><option>Sports</option>
+      </select>
+      <label for="noticeDate">Notice/event date</label>
+      <input id="noticeDate" type="date" required>
+      <label for="noticeDescription">Description</label>
+      <textarea id="noticeDescription" rows="5" maxlength="5000" required placeholder="Write the full announcement…"></textarea>
+      <label style="display:flex;gap:8px;align-items:center;"><input id="noticePublished" type="checkbox" checked style="width:auto;"> Publish on homepage immediately</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+        <button id="saveNoticeButton" type="submit">Save Notice</button>
+        <button id="cancelNoticeEdit" type="button" class="secondary-button">Clear Form</button>
+      </div>
+      <p id="noticeFormStatus" class="status" role="status" aria-live="polite"></p>
+    </form>
+    <hr>
+    <h4>Existing notices</h4>
+    <button type="button" id="reloadNoticesButton">Refresh Notices</button>
+    <p id="noticeListStatus" class="status" role="status" aria-live="polite"></p>
+    <div id="adminNoticeList">Loading notices…</div>
   </div>
 
   <div class="card feature-card" data-feature="enquiries">

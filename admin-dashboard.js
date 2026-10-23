@@ -69,6 +69,113 @@ async function loadActiveSubjects() {
   (data || []).forEach(subject => select.add(new Option(subject.name, subject.name)));
 }
 
+function resetNoticeForm() {
+  $("noticeForm").reset();
+  $("noticeEditId").value = "";
+  $("noticePublished").checked = true;
+  $("noticeDate").value = new Date().toISOString().slice(0, 10);
+  $("saveNoticeButton").textContent = "Save Notice";
+  showStatus("noticeFormStatus", "");
+}
+
+function safeNoticeText(value) {
+  const node = document.createElement("span");
+  node.textContent = value == null ? "" : String(value);
+  return node;
+}
+
+async function loadAdminNotices() {
+  if (!adminUser) return;
+  showStatus("noticeListStatus", "Loading notices…");
+  const { data, error } = await supabase
+    .from("school_notices")
+    .select("id,title,description,category,notice_date,is_published,created_at,published_at")
+    .order("created_at", { ascending: false });
+  if (error) {
+    showStatus("noticeListStatus", "Could not load notices: " + error.message);
+    return;
+  }
+  const host = $("adminNoticeList");
+  host.replaceChildren();
+  if (!data?.length) {
+    host.textContent = "No notices yet. Use the form above to create the first notice.";
+    showStatus("noticeListStatus", "");
+    return;
+  }
+  data.forEach(notice => {
+    const box = document.createElement("article");
+    box.style.cssText = "border:1px solid #dbe3ed;border-radius:10px;padding:14px;margin:12px 0;overflow-wrap:anywhere;";
+    const title = document.createElement("h4"); title.textContent = notice.title;
+    const meta = document.createElement("p");
+    meta.textContent = `${notice.category || "General"} · ${notice.is_published ? "Published" : "Unpublished"} · Notice date: ${notice.notice_date || "—"}`;
+    const desc = document.createElement("p"); desc.textContent = notice.description;
+    const actions = document.createElement("div"); actions.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
+    const edit = document.createElement("button"); edit.type = "button"; edit.textContent = "Edit";
+    edit.addEventListener("click", () => {
+      $("noticeEditId").value = notice.id;
+      $("noticeTitle").value = notice.title || "";
+      $("noticeCategory").value = notice.category || "General";
+      $("noticeDate").value = notice.notice_date || new Date().toISOString().slice(0,10);
+      $("noticeDescription").value = notice.description || "";
+      $("noticePublished").checked = !!notice.is_published;
+      $("saveNoticeButton").textContent = "Update Notice";
+      showStatus("noticeFormStatus", "Editing notice: " + notice.title);
+      $("noticeForm").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    const toggle = document.createElement("button"); toggle.type = "button"; toggle.textContent = notice.is_published ? "Unpublish" : "Publish";
+    toggle.addEventListener("click", async () => {
+      const nextPublished = !notice.is_published;
+      const update = { is_published: nextPublished, updated_at: new Date().toISOString() };
+      if (nextPublished) update.published_at = new Date().toISOString();
+      const { error: updateError } = await supabase.from("school_notices").update(update).eq("id", notice.id);
+      if (updateError) showStatus("noticeListStatus", "Could not update notice: " + updateError.message);
+      else { showStatus("noticeListStatus", nextPublished ? "Notice published." : "Notice unpublished."); await loadAdminNotices(); }
+    });
+    const del = document.createElement("button"); del.type = "button"; del.textContent = "Delete";
+    del.addEventListener("click", async () => {
+      if (!confirm(`Delete the notice “${notice.title}”? This cannot be undone.`)) return;
+      const { error: deleteError } = await supabase.from("school_notices").delete().eq("id", notice.id);
+      if (deleteError) showStatus("noticeListStatus", "Could not delete notice: " + deleteError.message);
+      else { showStatus("noticeListStatus", "Notice deleted."); await loadAdminNotices(); }
+    });
+    actions.append(edit, toggle, del); box.append(title, meta, desc, actions); host.append(box);
+  });
+  showStatus("noticeListStatus", `${data.length} notice(s) loaded. Published notices appear newest-first on the homepage.`);
+}
+
+$("noticeDate").value = new Date().toISOString().slice(0, 10);
+$("noticeForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  if (!adminUser) return showStatus("noticeFormStatus", "Admin access has not been verified.");
+  const button = $("saveNoticeButton");
+  button.disabled = true;
+  const id = $("noticeEditId").value;
+  const isPublished = $("noticePublished").checked;
+  const now = new Date().toISOString();
+  const payload = {
+    title: $("noticeTitle").value.trim(),
+    category: $("noticeCategory").value,
+    notice_date: $("noticeDate").value,
+    description: $("noticeDescription").value.trim(),
+    is_published: isPublished,
+    updated_at: now
+  };
+  if (isPublished) payload.published_at = now;
+  let result;
+  if (id) result = await supabase.from("school_notices").update(payload).eq("id", id);
+  else { payload.created_by = adminUser.id; result = await supabase.from("school_notices").insert(payload); }
+  button.disabled = false;
+  if (result.error) {
+    showStatus("noticeFormStatus", "Could not save notice: " + result.error.message);
+    return;
+  }
+  showStatus("noticeFormStatus", isPublished ? "Notice saved and published." : "Notice saved as unpublished.");
+  resetNoticeForm();
+  await loadAdminNotices();
+});
+$("cancelNoticeEdit").addEventListener("click", resetNoticeForm);
+$("reloadNoticesButton").addEventListener("click", loadAdminNotices);
+
 async function checkAdmin() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error) throw error;
@@ -139,6 +246,7 @@ function openPage(page) {
 
   if (page === "attendance") loadAttendanceRecords();
   if (page === "fees") loadFeeRecords();
+  if (page === "notices") loadAdminNotices();
 }
 
 function showHome() {
@@ -961,9 +1069,7 @@ $("feeForm")?.addEventListener("submit", async event => {
     amount:total,
     amount_paid:paid,
     due_date:$("feeDueDate").value || null,
-    // Supabase fees_status_check allows only these exact values.
-    // Overdue is calculated for display from the due date; it is not stored as a status.
-    status: paid >= total ? "Paid" : paid > 0 ? "Partially Paid" : "Pending"
+    status: paid>=total ? "paid" : paid>0 ? "partially_paid" : ($("feeDueDate").value && $("feeDueDate").value<feeToday() ? "overdue" : "pending")
   };
   const editId=$("feeEditId").value;
   setBusy(button,true,editId?"Updating…":"Saving…",editId?"Update Fee":"Save Fee");
