@@ -289,6 +289,36 @@ async function invokeUserCreation(body) {
   return data;
 }
 
+let studentsCache = [];
+
+function classNamesFromStudents(students) {
+  return [...new Set(students.map(student => student.class_name).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+function populateClassDropdown(id, placeholder, students) {
+  const select = $(id);
+  if (!select) return;
+  const previousValue = select.value;
+  select.replaceChildren(new Option(placeholder, ""));
+  classNamesFromStudents(students).forEach(className => select.add(new Option(className, className)));
+  if ([...select.options].some(option => option.value === previousValue)) select.value = previousValue;
+}
+
+function populateMarksStudentDropdown() {
+  const select = $("marksStudent");
+  if (!select) return;
+  const previousValue = select.value;
+  const selectedClass = $("marksClass")?.value || "";
+  const filtered = studentsCache.filter(student => !selectedClass || student.class_name === selectedClass);
+  select.replaceChildren(new Option(filtered.length ? "Select a student" : "No students in this class", ""));
+  filtered.forEach(student => {
+    const label = `${student.full_name} (${student.admission_number || "No admission number"})`;
+    select.add(new Option(label, student.id));
+  });
+  if (filtered.some(student => student.id === previousValue)) select.value = previousValue;
+}
+
 async function loadStudents() {
   const { data, error } = await supabase
     .from("students")
@@ -297,6 +327,9 @@ async function loadStudents() {
 
   if (error) throw error;
   const students = data || [];
+  studentsCache = students;
+  populateClassDropdown("marksClass", "All classes", students);
+  populateClassDropdown("resultsClass", "All classes", students);
   
 const classSelect = $("attendanceClass");
 
@@ -335,7 +368,7 @@ if (viewClassSelect) {
 }
 
   // Populate every student dropdown, including the Fees section.
-  for (const id of ["attendanceStudent", "marksStudent", "resultsStudent", "feeStudent"]) {
+  for (const id of ["attendanceStudent", "resultsStudent", "feeStudent"]) {
     const select = $(id);
     if (!select) continue;
     const previousValue = select.value;
@@ -354,10 +387,15 @@ if (viewClassSelect) {
     if (students.some(student => student.id === previousValue)) select.value = previousValue;
   }
 
+  // Apply the selected class to the mark-entry student list.
+  populateMarksStudentDropdown();
+
   // Keep the Fees class filter populated before fee records are refreshed.
   feeStudentsCache = students;
   populateFeeClassFilter();
 }
+
+$("marksClass").addEventListener("change", populateMarksStudentDropdown);
 
 $("studentForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -447,6 +485,7 @@ $("marksForm").addEventListener("submit", async e => {
     if (error) throw error;
     showStatus("marksMessage", "Marks saved successfully.");
     $("marksForm").reset();
+    populateMarksStudentDropdown();
   } catch (err) {
     showStatus("marksMessage", "Could not save marks: " + err.message);
   } finally {
@@ -454,8 +493,23 @@ $("marksForm").addEventListener("submit", async e => {
   }
 });
 
+
+$("resultsClass").addEventListener("change", () => {
+  const select = $("resultsStudent");
+  const previousValue = select.value;
+  const selectedClass = $("resultsClass").value;
+  const filtered = studentsCache.filter(student => !selectedClass || student.class_name === selectedClass);
+  select.replaceChildren(new Option("All students", ""));
+  filtered.forEach(student => {
+    select.add(new Option(`${student.full_name} (${student.admission_number || "No admission number"})`, student.id));
+  });
+  if (filtered.some(student => student.id === previousValue)) select.value = previousValue;
+});
+
 $("viewStudentResults").addEventListener("click", async () => {
   const studentId = $("resultsStudent").value;
+  const className = $("resultsClass").value;
+  const examSearch = $("resultsExam").value.trim().toLowerCase();
   showStatus("resultsMessage", "Loading results...");
   $("resultsList").replaceChildren();
 
@@ -467,13 +521,21 @@ $("viewStudentResults").addEventListener("click", async () => {
 
     const { data, error } = await query;
     if (error) throw error;
-    if (!data?.length) {
-      $("resultsList").textContent = "No results found.";
+
+    const filtered = (data || []).filter(record => {
+      const recordClass = record.students?.class_name || "";
+      const recordExam = String(record.exam_name || "").toLowerCase();
+      return (!className || recordClass === className) &&
+        (!examSearch || recordExam.includes(examSearch));
+    });
+
+    if (!filtered.length) {
+      $("resultsList").textContent = "No results found for the selected filters.";
       showStatus("resultsMessage", "0 results found.");
       return;
     }
 
-    const rows = data.map(r => [
+    const rows = filtered.map(r => [
       r.students?.full_name || "Unknown",
       r.students?.admission_number || "—",
       r.students?.class_name || "—",
@@ -486,10 +548,18 @@ $("viewStudentResults").addEventListener("click", async () => {
     $("resultsList").appendChild(makeTable(
       ["Student", "Admission No.", "Class", "Exam", "Subject", "Marks", "Percentage"], rows
     ));
-    showStatus("resultsMessage", `${data.length} result(s) found.`);
+    showStatus("resultsMessage", `${filtered.length} result(s) found.`);
   } catch (err) {
     showStatus("resultsMessage", "Could not load results: " + err.message);
   }
+});
+
+$("clearResultsFilters").addEventListener("click", () => {
+  $("resultsClass").value = "";
+  $("resultsStudent").value = "";
+  $("resultsExam").value = "";
+  showStatus("resultsMessage", "Filters cleared. Click View Results to show all results.");
+  $("resultsList").textContent = "Choose filters, then click View Results.";
 });
 
 $("attendanceForm").addEventListener("submit", async e => {

@@ -189,6 +189,8 @@
   <div class="card feature-card" data-feature="marks">
     <h3>📊 Marks and Results</h3>
     <form id="marksForm">
+      <label for="marksClass">Select class</label>
+      <select id="marksClass"><option value="">All classes</option></select>
       <label for="marksStudent">Select student</label>
       <select id="marksStudent" required><option value="">Loading students...</option></select>
       <label for="examName">Exam name</label>
@@ -204,9 +206,24 @@
     </form>
     <hr>
     <h4>View Student Results</h4>
-    <label for="resultsStudent">Select a student (or all students)</label>
-    <select id="resultsStudent"><option value="">All students</option></select>
-    <button type="button" id="viewStudentResults">View Results</button>
+    <div class="fee-filter-grid results-filter-grid">
+      <div>
+        <label for="resultsClass">Filter by class</label>
+        <select id="resultsClass"><option value="">All classes</option></select>
+      </div>
+      <div>
+        <label for="resultsStudent">Filter by student</label>
+        <select id="resultsStudent"><option value="">All students</option></select>
+      </div>
+      <div>
+        <label for="resultsExam">Filter by exam name</label>
+        <input id="resultsExam" type="text" placeholder="e.g. Unit Test 1">
+      </div>
+    </div>
+    <div class="fee-form-actions">
+      <button type="button" id="viewStudentResults">View Results</button>
+      <button type="button" id="clearResultsFilters" class="secondary-button">Clear Filters</button>
+    </div>
     <p id="resultsMessage" class="status" role="status"></p>
     <div id="resultsList">Choose a student or view all results.</div>
   </div>
