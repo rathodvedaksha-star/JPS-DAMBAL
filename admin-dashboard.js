@@ -289,47 +289,16 @@ async function invokeUserCreation(body) {
   return data;
 }
 
-let studentsCache = [];
-
-function classNamesFromStudents(students) {
-  return [...new Set(students.map(student => student.class_name).filter(Boolean))]
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-}
-
-function populateClassDropdown(id, placeholder, students) {
-  const select = $(id);
-  if (!select) return;
-  const previousValue = select.value;
-  select.replaceChildren(new Option(placeholder, ""));
-  classNamesFromStudents(students).forEach(className => select.add(new Option(className, className)));
-  if ([...select.options].some(option => option.value === previousValue)) select.value = previousValue;
-}
-
-function populateMarksStudentDropdown() {
-  const select = $("marksStudent");
-  if (!select) return;
-  const previousValue = select.value;
-  const selectedClass = $("marksClass")?.value || "";
-  const filtered = studentsCache.filter(student => !selectedClass || student.class_name === selectedClass);
-  select.replaceChildren(new Option(filtered.length ? "Select a student" : "No students in this class", ""));
-  filtered.forEach(student => {
-    const label = `${student.full_name} (${student.admission_number || "No admission number"})`;
-    select.add(new Option(label, student.id));
-  });
-  if (filtered.some(student => student.id === previousValue)) select.value = previousValue;
-}
-
 async function loadStudents() {
   const { data, error } = await supabase
     .from("students")
-    .select("id, full_name, admission_number, class_name")
+    .select("id, full_name, admission_number, class_name, parent_name, parent_phone")
     .order("full_name");
 
   if (error) throw error;
   const students = data || [];
-  studentsCache = students;
-  populateClassDropdown("marksClass", "All classes", students);
-  populateClassDropdown("resultsClass", "All classes", students);
+  window.jpsStudentDirectory = students;
+  renderStudentDirectory();
   
 const classSelect = $("attendanceClass");
 
@@ -368,7 +337,7 @@ if (viewClassSelect) {
 }
 
   // Populate every student dropdown, including the Fees section.
-  for (const id of ["attendanceStudent", "resultsStudent", "feeStudent"]) {
+  for (const id of ["attendanceStudent", "marksStudent", "resultsStudent", "feeStudent"]) {
     const select = $(id);
     if (!select) continue;
     const previousValue = select.value;
@@ -387,15 +356,269 @@ if (viewClassSelect) {
     if (students.some(student => student.id === previousValue)) select.value = previousValue;
   }
 
-  // Apply the selected class to the mark-entry student list.
-  populateMarksStudentDropdown();
-
   // Keep the Fees class filter populated before fee records are refreshed.
   feeStudentsCache = students;
   populateFeeClassFilter();
 }
 
-$("marksClass").addEventListener("change", populateMarksStudentDropdown);
+function renderStudentDirectory() {
+  const tbody = $("studentTableBody");
+  if (!tbody) return;
+  const query = ($("studentSearch")?.value || "").trim().toLocaleLowerCase();
+  const students = (window.jpsStudentDirectory || []).filter(student =>
+    [student.full_name, student.admission_number, student.class_name, student.parent_name, student.parent_phone]
+      .some(value => String(value || "").toLocaleLowerCase().includes(query))
+  );
+  tbody.replaceChildren();
+
+  if (!students.length) {
+    const row = tbody.insertRow();
+    const cell = row.insertCell();
+    cell.colSpan = 6;
+    cell.className = "directory-empty";
+    cell.textContent = query ? "No students match your search." : "No students have been added yet.";
+  } else {
+    students.forEach(student => {
+      const row = tbody.insertRow();
+      [student.admission_number, student.full_name, student.class_name, student.parent_name, student.parent_phone]
+        .forEach(value => {
+          const cell = row.insertCell();
+          cell.textContent = value || "—";
+        });
+      const actions = row.insertCell();
+      actions.className = "student-directory-actions";
+      const editButton = document.createElement("button");
+editButton.type = "button";
+editButton.className = "directory-edit-button";
+editButton.textContent = "Edit";
+editButton.dataset.studentEdit = student.id;
+actions.appendChild(editButton);
+
+const deleteButton = document.createElement("button");
+deleteButton.type = "button";
+deleteButton.className = "directory-delete-button";
+deleteButton.textContent = "Delete";
+deleteButton.dataset.studentDelete = student.id;
+actions.appendChild(deleteButton);
+    });
+  }
+  const status = $("studentListMessage");
+  if (status) status.textContent = `${students.length} student${students.length === 1 ? "" : "s"} shown.`;
+}
+
+async function editStudent(studentId) {
+  const student = (window.jpsStudentDirectory || []).find(
+    item => String(item.id) === String(studentId)
+  );
+
+  if (!student) {
+    showStatus(
+      "studentListMessage",
+      "Student not found. Refresh the directory and try again."
+    );
+    return;
+  }
+
+  const modal = $("editStudentModal");
+  if (!modal) {
+    showStatus(
+      "studentListMessage",
+      "Edit form not found. Please add the edit form in the HTML."
+    );
+    return;
+  }
+
+  $("editStudentId").value = student.id;
+  $("editStudentName").value = student.full_name || "";
+  $("editAdmissionNumber").value = student.admission_number || "";
+  $("editStudentClass").value = student.class_name || "";
+  $("editParentName").value = student.parent_name || "";
+  $("editParentPhone").value = student.parent_phone || "";
+
+  showStatus("editStudentMessage", "");
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden", "false");
+  $("editStudentName").focus();
+}
+
+$("studentTableBody")?.addEventListener("click", event => {
+  const deleteButton = event.target.closest("[data-student-delete]");
+
+  if (deleteButton) {
+    deleteStudent(deleteButton.dataset.studentDelete);
+    return;
+  }
+
+  const editButton = event.target.closest("[data-student-edit]");
+  if (editButton) {
+    editStudent(editButton.dataset.studentEdit);
+  }
+});
+
+$("studentSearch")?.addEventListener("input", renderStudentDirectory);
+async function deleteStudent(studentId) {
+  const student = (window.jpsStudentDirectory || []).find(
+    item => String(item.id) === String(studentId)
+  );
+
+  if (!student) {
+    showStatus("studentListMessage", "Student not found. Refresh the directory and try again.");
+    return;
+  }
+
+  const confirmed = confirm(
+    `Delete student "${student.full_name}" (${student.admission_number})?\n\n` +
+    "This action cannot be undone. Existing attendance, marks, or fee records must be preserved."
+  );
+
+  if (!confirmed) return;
+
+  const buttons = [...document.querySelectorAll("[data-student-delete]")];
+  buttons.forEach(button => button.disabled = true);
+
+  showStatus("studentListMessage", "Checking student records...");
+
+  try {
+    // The server-side function must perform the record checks and deletion.
+    // Do not delete directly from the browser.
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    if (sessionError) throw sessionError;
+
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      throw new Error("Your admin session has expired. Please sign in again.");
+    }
+
+    const { data, error } = await supabase.functions.invoke(
+      "manage-school-users",
+      {
+        body: {
+          action: "delete_student",
+          user_id: studentId
+        },
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+
+    if (error) throw error;
+
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+
+    showStatus(
+      "studentListMessage",
+      data?.message || "Student deleted successfully."
+    );
+
+    await loadStudents();
+  } catch (error) {
+    console.error("Could not delete student:", error);
+    showStatus(
+      "studentListMessage",
+      "Student was not deleted: " + (error.message || String(error))
+    );
+  } finally {
+    buttons.forEach(button => button.disabled = false);
+  }
+}
+// Save edited student details
+$("editStudentForm")?.addEventListener("submit", async event => {
+  event.preventDefault();
+
+  const studentId = $("editStudentId").value;
+
+  const updates = {
+    full_name: $("editStudentName").value.trim(),
+    admission_number: $("editAdmissionNumber").value.trim(),
+    class_name: $("editStudentClass").value.trim(),
+    parent_name: $("editParentName").value.trim() || null,
+    parent_phone: $("editParentPhone").value.trim() || null
+  };
+
+  if (!studentId) {
+    showStatus("editStudentMessage", "Student ID is missing.");
+    return;
+  }
+
+  if (!updates.full_name || !updates.admission_number || !updates.class_name) {
+    showStatus(
+      "editStudentMessage",
+      "Student name, admission number, and class are required."
+    );
+    return;
+  }
+
+  const duplicate = (window.jpsStudentDirectory || []).find(student =>
+    String(student.id) !== String(studentId) &&
+    String(student.admission_number || "").trim().toLowerCase() ===
+      updates.admission_number.toLowerCase()
+  );
+
+  if (duplicate) {
+    showStatus(
+      "editStudentMessage",
+      "That admission number is already assigned to another student."
+    );
+    return;
+  }
+
+  const button = $("saveEditStudent");
+  setBusy(button, true, "Saving...", "Save Changes");
+  showStatus("editStudentMessage", "Saving student details...");
+
+  try {
+    const { error } = await supabase
+      .from("students")
+      .update(updates)
+      .eq("id", studentId);
+
+    if (error) throw error;
+
+    $("editStudentModal").hidden = true;
+    $("editStudentModal").setAttribute("aria-hidden", "true");
+
+    showStatus("studentListMessage", "Student details updated successfully.");
+    await loadStudents();
+  } catch (error) {
+    console.error("Could not update student:", error);
+    showStatus(
+      "editStudentMessage",
+      "Could not update student: " + (error.message || String(error))
+    );
+  } finally {
+    setBusy(button, false, "", "Save Changes");
+  }
+});
+
+// Close the edit form
+function closeStudentEditModal() {
+  const modal = $("editStudentModal");
+  if (!modal) return;
+
+  modal.hidden = true;
+  modal.setAttribute("aria-hidden", "true");
+}
+
+$("closeEditStudent")?.addEventListener("click", closeStudentEditModal);
+$("cancelEditStudent")?.addEventListener("click", closeStudentEditModal);
+
+$("editStudentModal")?.addEventListener("click", event => {
+  if (event.target.id === "editStudentModal") {
+    closeStudentEditModal();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !$("editStudentModal")?.hidden) {
+    closeStudentEditModal();
+  }
+});
 
 $("studentForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -485,7 +708,6 @@ $("marksForm").addEventListener("submit", async e => {
     if (error) throw error;
     showStatus("marksMessage", "Marks saved successfully.");
     $("marksForm").reset();
-    populateMarksStudentDropdown();
   } catch (err) {
     showStatus("marksMessage", "Could not save marks: " + err.message);
   } finally {
@@ -493,23 +715,8 @@ $("marksForm").addEventListener("submit", async e => {
   }
 });
 
-
-$("resultsClass").addEventListener("change", () => {
-  const select = $("resultsStudent");
-  const previousValue = select.value;
-  const selectedClass = $("resultsClass").value;
-  const filtered = studentsCache.filter(student => !selectedClass || student.class_name === selectedClass);
-  select.replaceChildren(new Option("All students", ""));
-  filtered.forEach(student => {
-    select.add(new Option(`${student.full_name} (${student.admission_number || "No admission number"})`, student.id));
-  });
-  if (filtered.some(student => student.id === previousValue)) select.value = previousValue;
-});
-
 $("viewStudentResults").addEventListener("click", async () => {
   const studentId = $("resultsStudent").value;
-  const className = $("resultsClass").value;
-  const examSearch = $("resultsExam").value.trim().toLowerCase();
   showStatus("resultsMessage", "Loading results...");
   $("resultsList").replaceChildren();
 
@@ -521,21 +728,13 @@ $("viewStudentResults").addEventListener("click", async () => {
 
     const { data, error } = await query;
     if (error) throw error;
-
-    const filtered = (data || []).filter(record => {
-      const recordClass = record.students?.class_name || "";
-      const recordExam = String(record.exam_name || "").toLowerCase();
-      return (!className || recordClass === className) &&
-        (!examSearch || recordExam.includes(examSearch));
-    });
-
-    if (!filtered.length) {
-      $("resultsList").textContent = "No results found for the selected filters.";
+    if (!data?.length) {
+      $("resultsList").textContent = "No results found.";
       showStatus("resultsMessage", "0 results found.");
       return;
     }
 
-    const rows = filtered.map(r => [
+    const rows = data.map(r => [
       r.students?.full_name || "Unknown",
       r.students?.admission_number || "—",
       r.students?.class_name || "—",
@@ -548,18 +747,10 @@ $("viewStudentResults").addEventListener("click", async () => {
     $("resultsList").appendChild(makeTable(
       ["Student", "Admission No.", "Class", "Exam", "Subject", "Marks", "Percentage"], rows
     ));
-    showStatus("resultsMessage", `${filtered.length} result(s) found.`);
+    showStatus("resultsMessage", `${data.length} result(s) found.`);
   } catch (err) {
     showStatus("resultsMessage", "Could not load results: " + err.message);
   }
-});
-
-$("clearResultsFilters").addEventListener("click", () => {
-  $("resultsClass").value = "";
-  $("resultsStudent").value = "";
-  $("resultsExam").value = "";
-  showStatus("resultsMessage", "Filters cleared. Click View Results to show all results.");
-  $("resultsList").textContent = "Choose filters, then click View Results.";
 });
 
 $("attendanceForm").addEventListener("submit", async e => {

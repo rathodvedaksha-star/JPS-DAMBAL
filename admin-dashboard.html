@@ -28,6 +28,16 @@
 #feeForm .fee-form-actions{display:flex;gap:8px;flex-wrap:wrap}
 #feeForm #feeMessage{margin-top:4px}
 </style>
+
+<style>
+/* Step 2: student directory actions; existing dashboard styling remains intact. */
+.student-directory-actions { white-space: nowrap; }
+.directory-edit-button { padding: 7px 12px; margin: 2px; cursor: pointer; }
+.directory-edit-button:disabled { opacity: .6; cursor: wait; }
+.student-list-card .student-table-wrap { width: 100%; overflow-x: auto; }
+.student-list-card table { min-width: 680px; }
+</style>
+
 </head>
 
 <body>
@@ -113,6 +123,33 @@
       <p id="studentMessage" class="status" role="status"></p>
     </form>
     <p class="note muted">Use a temporary password and share it securely with the student or parent.</p>
+
+    <!-- Student Directory: kept inside the existing Student Management feature -->
+    <section class="student-directory-panel" aria-labelledby="studentDirectoryHeading">
+      <style>
+        .student-directory-panel{margin-top:24px;padding-top:20px;border-top:1px solid #dbe3ee;min-width:0}
+        .student-directory-panel h4{margin:0 0 8px;color:var(--primary,#164e8a)}
+        .student-directory-panel .directory-search{width:100%;max-width:560px;margin:6px 0 12px}
+        .student-table-wrap{width:100%;overflow-x:auto;border:1px solid #dbe3ee;border-radius:10px;background:#fff;-webkit-overflow-scrolling:touch}
+        #studentTable{width:100%;min-width:720px;border-collapse:collapse}
+        #studentTable th,#studentTable td{padding:10px 12px;text-align:left;border-bottom:1px solid #e5eaf1;vertical-align:top}
+        #studentTable th{background:#edf4fc;color:#164e8a;font-size:.9rem;white-space:nowrap}
+        #studentTable tbody tr:last-child td{border-bottom:0}
+        #studentTable .directory-empty{text-align:center;color:#64748b;padding:18px}
+        @media(max-width:600px){.student-directory-panel{margin-top:18px;padding-top:16px}.student-table-wrap{border-radius:8px}#studentTable th,#studentTable td{padding:9px;font-size:.9rem}}
+      </style>
+      <h4 id="studentDirectoryHeading">🎓 Student Directory</h4>
+      <p class="muted">View registered students and search across student and parent details.</p>
+      <label for="studentSearch">Search by name, admission number, class, parent name, or phone</label>
+      <input class="directory-search" id="studentSearch" type="search" placeholder="Type to search students..." autocomplete="off">
+      <p id="studentListMessage" class="status" role="status" aria-live="polite">Loading students...</p>
+      <div class="student-table-wrap" role="region" aria-label="Student directory table" tabindex="0">
+        <table id="studentTable">
+          <thead><tr><th>Admission No.</th><th>Student Name</th><th>Class</th><th>Parent Name</th><th>Parent Phone</th><th>Actions</th></tr></thead>
+          <tbody id="studentTableBody"><tr><td class="directory-empty" colspan="6">Loading students...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
   </div>
 
   <div class="card feature-card" data-feature="admins">
@@ -189,8 +226,6 @@
   <div class="card feature-card" data-feature="marks">
     <h3>📊 Marks and Results</h3>
     <form id="marksForm">
-      <label for="marksClass">Select class</label>
-      <select id="marksClass"><option value="">All classes</option></select>
       <label for="marksStudent">Select student</label>
       <select id="marksStudent" required><option value="">Loading students...</option></select>
       <label for="examName">Exam name</label>
@@ -206,24 +241,9 @@
     </form>
     <hr>
     <h4>View Student Results</h4>
-    <div class="fee-filter-grid results-filter-grid">
-      <div>
-        <label for="resultsClass">Filter by class</label>
-        <select id="resultsClass"><option value="">All classes</option></select>
-      </div>
-      <div>
-        <label for="resultsStudent">Filter by student</label>
-        <select id="resultsStudent"><option value="">All students</option></select>
-      </div>
-      <div>
-        <label for="resultsExam">Filter by exam name</label>
-        <input id="resultsExam" type="text" placeholder="e.g. Unit Test 1">
-      </div>
-    </div>
-    <div class="fee-form-actions">
-      <button type="button" id="viewStudentResults">View Results</button>
-      <button type="button" id="clearResultsFilters" class="secondary-button">Clear Filters</button>
-    </div>
+    <label for="resultsStudent">Select a student (or all students)</label>
+    <select id="resultsStudent"><option value="">All students</option></select>
+    <button type="button" id="viewStudentResults">View Results</button>
     <p id="resultsMessage" class="status" role="status"></p>
     <div id="resultsList">Choose a student or view all results.</div>
   </div>
@@ -348,5 +368,41 @@
 </main>
 
 <script type="module" src="admin-dashboard.js"></script>
+<!-- Edit Student Modal -->
+<div id="editStudentModal" class="edit-student-modal" hidden aria-hidden="true">
+  <div class="edit-student-card" role="dialog" aria-modal="true" aria-labelledby="editStudentTitle">
+
+    <button type="button" id="closeEditStudent" class="edit-student-close" aria-label="Close">&times;</button>
+
+    <h2 id="editStudentTitle">Edit Student Details</h2>
+    <p>Update the student's information below.</p>
+
+    <form id="editStudentForm">
+      <input type="hidden" id="editStudentId">
+
+      <label for="editStudentName">Student Full Name *</label>
+      <input type="text" id="editStudentName" required>
+
+      <label for="editAdmissionNumber">Admission Number *</label>
+      <input type="text" id="editAdmissionNumber" required>
+
+      <label for="editStudentClass">Class *</label>
+      <input type="text" id="editStudentClass" required>
+
+      <label for="editParentName">Parent Name</label>
+      <input type="text" id="editParentName">
+
+      <label for="editParentPhone">Parent Phone</label>
+      <input type="tel" id="editParentPhone" inputmode="tel">
+
+      <p id="editStudentMessage" role="status" aria-live="polite"></p>
+
+      <div class="edit-student-actions">
+        <button type="button" id="cancelEditStudent">Cancel</button>
+        <button type="submit" id="saveEditStudent">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
 </body>
 </html>
