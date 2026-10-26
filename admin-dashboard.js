@@ -1324,14 +1324,18 @@ $("feeForm")?.addEventListener("submit", async event => {
     showStatus("feeMessage","Enter a valid total fee and an amount paid between ₹0 and the total fee.");
     return;
   }
-  const record={
-    student_id:$("feeStudent").value,
-    description:$("feeDescription").value.trim(),
-    amount:total,
-    amount_paid:paid,
-    due_date:$("feeDueDate").value || null,
-    status: paid>=total ? "Paid" : paid>0 ? "Partially_paid" : ($("feeDueDate").value && $("feeDueDate").value<feeToday() ? "overdue" : "Pending")
-  };
+const record = {
+  student_id: $("feeStudent").value,
+  description: $("feeDescription").value.trim(),
+  amount: total,
+  amount_paid: paid,
+  due_date: $("feeDueDate").value || null,
+  status: paid >= total
+    ? "Paid"
+    : paid > 0
+      ? "Partially Paid"
+      : "Pending"
+};
   const editId=$("feeEditId").value;
   setBusy(button,true,editId?"Updating…":"Saving…",editId?"Update Fee":"Save Fee");
   try {
