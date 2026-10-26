@@ -1330,7 +1330,7 @@ $("feeForm")?.addEventListener("submit", async event => {
     amount:total,
     amount_paid:paid,
     due_date:$("feeDueDate").value || null,
-    status: paid>=total ? "paid" : paid>0 ? "partially_paid" : ($("feeDueDate").value && $("feeDueDate").value<feeToday() ? "overdue" : "pending")
+    status: paid>=total ? "Paid" : paid>0 ? "Partially_paid" : ($("feeDueDate").value && $("feeDueDate").value<feeToday() ? "overdue" : "Pending")
   };
   const editId=$("feeEditId").value;
   setBusy(button,true,editId?"Updating…":"Saving…",editId?"Update Fee":"Save Fee");
