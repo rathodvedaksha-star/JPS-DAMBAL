@@ -203,7 +203,7 @@ header {
     width: 100%;
     min-height: 300px;
     max-height: 430px;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 12px;
     box-shadow: 12px 12px 0 #e9a23b;
 }

@@ -1,4 +1,3 @@
-
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 const SUPABASE_URL = "https://tjybrmumnxulnqxpsxhi.supabase.co";
@@ -51,22 +50,24 @@ function makeTable(headers, rows) {
   return table;
 }
 
+let activeSubjectNames = [];
+
 async function loadActiveSubjects() {
-  const select = $("subjectName");
+  const selects = [$("subjectName"), $("classMarksSubject")].filter(Boolean);
   const { data, error } = await supabase
     .from("school_subjects")
     .select("name")
     .eq("is_active", true)
     .order("name");
 
-  select.replaceChildren(new Option(error ? "Could not load subjects" : "Select a subject", ""));
+  activeSubjectNames = error ? [] : (data || []).map(subject => subject.name);
 
-  if (error) {
-    console.error("Subject loading failed:", error.message);
-    return;
-  }
+  selects.forEach(select => {
+    select.replaceChildren(new Option(error ? "Could not load subjects" : "Select a subject", ""));
+    activeSubjectNames.forEach(name => select.add(new Option(name, name)));
+  });
 
-  (data || []).forEach(subject => select.add(new Option(subject.name, subject.name)));
+  if (error) console.error("Subject loading failed:", error.message);
 }
 
 function resetNoticeForm() {
@@ -289,6 +290,16 @@ async function invokeUserCreation(body) {
   return data;
 }
 
+function populateMarksClassSelect(students) {
+  const select = $("classMarksClass");
+  if (!select) return;
+  const previous = select.value;
+  const classes = [...new Set(students.map(s => s.class_name).filter(Boolean))].sort();
+  select.replaceChildren(new Option("Select a class", ""));
+  classes.forEach(className => select.add(new Option(className, className)));
+  if (classes.includes(previous)) select.value = previous;
+}
+
 async function loadStudents() {
   const { data, error } = await supabase
     .from("students")
@@ -299,6 +310,7 @@ async function loadStudents() {
   const students = data || [];
   window.jpsStudentDirectory = students;
   renderStudentDirectory();
+  populateMarksClassSelect(students);
   
 const classSelect = $("attendanceClass");
 
@@ -715,43 +727,379 @@ $("marksForm").addEventListener("submit", async e => {
   }
 });
 
-$("viewStudentResults").addEventListener("click", async () => {
+// ---------- Whole-class marks entry ----------
+let classMarksContext = null;
+
+function classMarksFormValues() {
+  return {
+    className: $("classMarksClass").value,
+    examName: $("classMarksExam").value.trim(),
+    subject: $("classMarksSubject").value.trim()
+  };
+}
+
+async function loadClassMarks() {
+  const { className, examName, subject } = classMarksFormValues();
+  const list = $("classMarksList");
+
+  showStatus("classMarksMessage", "");
+  list.replaceChildren();
+  classMarksContext = null;
+
+  if (!className || !examName || !subject) {
+    showStatus("classMarksMessage", "Please select a class, enter the exam name, and select a subject.");
+    return;
+  }
+
+  showStatus("classMarksMessage", "Loading students...");
+
+  try {
+    const { data: students, error } = await supabase
+      .from("students")
+      .select("id, full_name, admission_number")
+      .eq("class_name", className)
+      .order("full_name");
+    if (error) throw error;
+
+    if (!students?.length) {
+      showStatus("classMarksMessage", "No students found in this class.");
+      return;
+    }
+
+    const { data: saved, error: savedError } = await supabase
+      .from("marks")
+      .select("id, student_id, marks_obtained, max_marks")
+      .eq("exam_name", examName)
+      .eq("subject", subject)
+      .in("student_id", students.map(s => s.id));
+    if (savedError) throw savedError;
+
+    const savedByStudent = new Map((saved || []).map(record => [record.student_id, record]));
+
+    if (!$("classMarksMax").value && saved?.length) {
+      $("classMarksMax").value = saved[0].max_marks;
+    }
+
+    const table = document.createElement("table");
+    table.className = "marks-table";
+    const headRow = table.createTHead().insertRow();
+    ["Student", "Admission No.", "Marks obtained"].forEach(text => {
+      const th = document.createElement("th");
+      th.textContent = text;
+      headRow.appendChild(th);
+    });
+
+    const tbody = table.createTBody();
+    students.forEach(student => {
+      const row = tbody.insertRow();
+      row.insertCell().textContent = student.full_name;
+      row.insertCell().textContent = student.admission_number || "—";
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.min = "0";
+      input.step = "0.01";
+      input.className = "class-marks-input";
+      input.dataset.studentId = student.id;
+      input.setAttribute("aria-label", "Marks for " + student.full_name);
+      const existing = savedByStudent.get(student.id);
+      if (existing) input.value = existing.marks_obtained;
+      row.insertCell().appendChild(input);
+    });
+
+    list.appendChild(table);
+
+    classMarksContext = {
+      className,
+      examName,
+      subject,
+      existingIds: new Map((saved || []).map(record => [record.student_id, record.id]))
+    };
+
+    showStatus(
+      "classMarksMessage",
+      `${students.length} students loaded. ${saved?.length || 0} already have marks saved. ` +
+      "Leave a box empty to skip that student."
+    );
+  } catch (err) {
+    showStatus("classMarksMessage", "Could not load class: " + err.message);
+  }
+}
+
+$("loadClassMarksButton").addEventListener("click", loadClassMarks);
+
+$("saveClassMarksButton").addEventListener("click", async () => {
+  const context = classMarksContext;
+  if (!context) {
+    showStatus("classMarksMessage", "Load a class, exam and subject first.");
+    return;
+  }
+
+  const current = classMarksFormValues();
+  if (current.className !== context.className || current.examName !== context.examName || current.subject !== context.subject) {
+    showStatus("classMarksMessage", "The class, exam or subject was changed. Click Load Students again.");
+    return;
+  }
+
+  const maxMarks = Number($("classMarksMax").value);
+  if (!$("classMarksMax").value || !Number.isFinite(maxMarks) || maxMarks <= 0) {
+    showStatus("classMarksMessage", "Enter valid maximum marks.");
+    return;
+  }
+
+  const toInsert = [];
+  const toUpdate = [];
+  for (const input of $("classMarksList").querySelectorAll(".class-marks-input")) {
+    if (input.value.trim() === "") continue;
+    const marks = Number(input.value);
+    if (!Number.isFinite(marks) || marks < 0 || marks > maxMarks) {
+      input.focus();
+      showStatus("classMarksMessage", `Marks must be between 0 and ${maxMarks} for every student.`);
+      return;
+    }
+    const studentId = input.dataset.studentId;
+    const existingId = context.existingIds.get(studentId);
+    if (existingId) {
+      toUpdate.push({ id: existingId, marks_obtained: marks });
+    } else {
+      toInsert.push({
+        student_id: studentId,
+        exam_name: context.examName,
+        subject: context.subject,
+        marks_obtained: marks,
+        max_marks: maxMarks
+      });
+    }
+  }
+
+  if (!toInsert.length && !toUpdate.length) {
+    showStatus("classMarksMessage", "Enter marks for at least one student.");
+    return;
+  }
+
+  const button = $("saveClassMarksButton");
+  setBusy(button, true, "Saving marks...", "Save Whole-Class Marks");
+
+  let resultMessage = "";
+  let needsReload = false;
+
+  try {
+    if (toInsert.length) {
+      const { error } = await supabase.from("marks").insert(toInsert);
+      if (error) throw error;
+      needsReload = true;
+    }
+
+    if (toUpdate.length) {
+      const results = await Promise.all(toUpdate.map(item =>
+        supabase.from("marks")
+          .update({ marks_obtained: item.marks_obtained, max_marks: maxMarks })
+          .eq("id", item.id)
+          .select("id")
+      ));
+      needsReload = true;
+      const failed = results.find(result => result.error);
+      if (failed) throw failed.error;
+      if (results.some(result => !result.data?.length)) {
+        throw new Error("Some existing marks could not be updated. Check your database permissions.");
+      }
+    }
+
+    resultMessage = `Marks saved for ${toInsert.length + toUpdate.length} students ` +
+      `(${toInsert.length} new, ${toUpdate.length} updated).`;
+  } catch (err) {
+    resultMessage = "Could not save marks: " + err.message;
+  } finally {
+    setBusy(button, false, "", "Save Whole-Class Marks");
+  }
+
+  // Reload so newly saved rows are recognised as existing records on the next save.
+  if (needsReload) await loadClassMarks();
+  showStatus("classMarksMessage", resultMessage);
+});
+
+// ---------- Results: view, edit, delete ----------
+function percentageText(obtained, max) {
+  const maxNumber = Number(max);
+  if (!(maxNumber > 0)) return "—";
+  return ((Number(obtained) / maxNumber) * 100).toFixed(1) + "%";
+}
+
+function makeActionButton(text, className) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = text;
+  button.className = className;
+  return button;
+}
+
+function buildResultRow(record) {
+  const row = document.createElement("tr");
+  [
+    record.students?.full_name || "Unknown",
+    record.students?.admission_number || "—",
+    record.students?.class_name || "—",
+    record.exam_name,
+    record.subject,
+    `${record.marks_obtained} / ${record.max_marks}`,
+    percentageText(record.marks_obtained, record.max_marks)
+  ].forEach(value => {
+    row.insertCell().textContent = value == null ? "—" : String(value);
+  });
+
+  const actions = row.insertCell();
+  actions.className = "marks-row-actions";
+  const editButton = makeActionButton("Edit", "marks-edit-btn");
+  const deleteButton = makeActionButton("Delete", "marks-delete-btn");
+  editButton.addEventListener("click", () => startEditResultRow(row, record));
+  deleteButton.addEventListener("click", () => deleteResult(record, deleteButton));
+  actions.append(editButton, deleteButton);
+  return row;
+}
+
+function buildResultsTable(records) {
+  const table = document.createElement("table");
+  table.className = "marks-table";
+  const headRow = table.createTHead().insertRow();
+  ["Student", "Admission No.", "Class", "Exam", "Subject", "Marks", "Percentage", "Actions"].forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headRow.appendChild(th);
+  });
+  const tbody = table.createTBody();
+  records.forEach(record => tbody.appendChild(buildResultRow(record)));
+  return table;
+}
+
+function startEditResultRow(row, record) {
+  const cells = row.cells;
+
+  const examInput = document.createElement("input");
+  examInput.type = "text";
+  examInput.value = record.exam_name || "";
+  examInput.setAttribute("aria-label", "Exam name");
+
+  const subjectSelect = document.createElement("select");
+  subjectSelect.setAttribute("aria-label", "Subject");
+  const subjectNames = [...activeSubjectNames];
+  if (record.subject && !subjectNames.includes(record.subject)) subjectNames.unshift(record.subject);
+  subjectNames.forEach(name => subjectSelect.add(new Option(name, name)));
+  subjectSelect.value = record.subject;
+
+  const obtainedInput = document.createElement("input");
+  obtainedInput.type = "number";
+  obtainedInput.min = "0";
+  obtainedInput.step = "0.01";
+  obtainedInput.value = record.marks_obtained;
+  obtainedInput.setAttribute("aria-label", "Marks obtained");
+
+  const maxInput = document.createElement("input");
+  maxInput.type = "number";
+  maxInput.min = "0.01";
+  maxInput.step = "0.01";
+  maxInput.value = record.max_marks;
+  maxInput.setAttribute("aria-label", "Maximum marks");
+
+  const marksBox = document.createElement("div");
+  marksBox.className = "marks-edit-pair";
+  marksBox.append(obtainedInput, " / ", maxInput);
+
+  const saveButton = makeActionButton("Save", "marks-save-btn");
+  const cancelButton = makeActionButton("Cancel", "marks-cancel-btn");
+
+  cells[3].replaceChildren(examInput);
+  cells[4].replaceChildren(subjectSelect);
+  cells[5].replaceChildren(marksBox);
+  cells[7].replaceChildren(saveButton, cancelButton);
+
+  cancelButton.addEventListener("click", () => {
+    showStatus("resultsMessage", "");
+    row.replaceWith(buildResultRow(record));
+  });
+
+  saveButton.addEventListener("click", async () => {
+    const examName = examInput.value.trim();
+    const subject = subjectSelect.value.trim();
+    const marksObtained = Number(obtainedInput.value);
+    const maxMarks = Number(maxInput.value);
+
+    if (!examName || !subject || obtainedInput.value === "" || maxInput.value === "" ||
+        !Number.isFinite(marksObtained) || !Number.isFinite(maxMarks) ||
+        marksObtained < 0 || maxMarks <= 0 || marksObtained > maxMarks) {
+      showStatus("resultsMessage", "Enter valid marks. Obtained marks cannot exceed maximum marks.");
+      return;
+    }
+
+    saveButton.disabled = true;
+    cancelButton.disabled = true;
+    saveButton.textContent = "Saving...";
+
+    try {
+      const { data, error } = await supabase
+        .from("marks")
+        .update({ exam_name: examName, subject, marks_obtained: marksObtained, max_marks: maxMarks })
+        .eq("id", record.id)
+        .select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("No record was updated. Check your database permissions.");
+      await loadStudentResults("Marks updated.");
+    } catch (err) {
+      showStatus("resultsMessage", "Could not update marks: " + err.message);
+      saveButton.disabled = false;
+      cancelButton.disabled = false;
+      saveButton.textContent = "Save";
+    }
+  });
+}
+
+async function deleteResult(record, button) {
+  const who = record.students?.full_name || "this student";
+  if (!confirm(`Delete ${who}'s ${record.subject} marks for "${record.exam_name}"? This cannot be undone.`)) return;
+
+  button.disabled = true;
+  try {
+    const { data, error } = await supabase
+      .from("marks")
+      .delete()
+      .eq("id", record.id)
+      .select("id");
+    if (error) throw error;
+    if (!data?.length) throw new Error("No record was deleted. Check your database permissions.");
+    await loadStudentResults("Marks deleted.");
+  } catch (err) {
+    showStatus("resultsMessage", "Could not delete marks: " + err.message);
+    button.disabled = false;
+  }
+}
+
+async function loadStudentResults(notice = "") {
   const studentId = $("resultsStudent").value;
   showStatus("resultsMessage", "Loading results...");
   $("resultsList").replaceChildren();
 
   try {
     let query = supabase.from("marks")
-      .select("exam_name, subject, marks_obtained, max_marks, student_id, students(full_name, admission_number, class_name)")
-      .order("exam_name");
+      .select("id, exam_name, subject, marks_obtained, max_marks, student_id, students(full_name, admission_number, class_name)")
+      .order("exam_name")
+      .order("subject");
     if (studentId) query = query.eq("student_id", studentId);
 
     const { data, error } = await query;
     if (error) throw error;
     if (!data?.length) {
       $("resultsList").textContent = "No results found.";
-      showStatus("resultsMessage", "0 results found.");
+      showStatus("resultsMessage", `${notice} 0 results found.`.trim());
       return;
     }
 
-    const rows = data.map(r => [
-      r.students?.full_name || "Unknown",
-      r.students?.admission_number || "—",
-      r.students?.class_name || "—",
-      r.exam_name,
-      r.subject,
-      `${r.marks_obtained} / ${r.max_marks}`,
-      `${((Number(r.marks_obtained) / Number(r.max_marks)) * 100).toFixed(1)}%`
-    ]);
-
-    $("resultsList").appendChild(makeTable(
-      ["Student", "Admission No.", "Class", "Exam", "Subject", "Marks", "Percentage"], rows
-    ));
-    showStatus("resultsMessage", `${data.length} result(s) found.`);
+    $("resultsList").appendChild(buildResultsTable(data));
+    showStatus("resultsMessage", `${notice} ${data.length} result(s) found.`.trim());
   } catch (err) {
     showStatus("resultsMessage", "Could not load results: " + err.message);
   }
-});
+}
+
+$("viewStudentResults").addEventListener("click", () => loadStudentResults());
 
 $("attendanceForm").addEventListener("submit", async e => {
   e.preventDefault();

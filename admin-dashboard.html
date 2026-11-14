@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,6 +35,23 @@
 .directory-edit-button:disabled { opacity: .6; cursor: wait; }
 .student-list-card .student-table-wrap { width: 100%; overflow-x: auto; }
 .student-list-card table { min-width: 680px; }
+</style>
+
+<style>
+/* Marks: whole-class entry and editable results table */
+#classMarksList,#resultsList{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.marks-table{min-width:560px}
+#resultsList .marks-table{min-width:920px}
+.marks-table input,.marks-table select{width:100%;min-width:70px;box-sizing:border-box;padding:6px 8px;margin:0}
+.class-marks-input{max-width:130px}
+.marks-edit-pair{display:flex;align-items:center;gap:4px}
+.marks-edit-pair input{width:80px;min-width:0}
+.marks-row-actions{white-space:nowrap}
+.marks-row-actions button{font:inherit;border:0;border-radius:7px;padding:6px 10px;margin:2px;cursor:pointer;background:#e2e8f0;color:#0f172a}
+.marks-row-actions button:disabled{opacity:.6;cursor:wait}
+.marks-row-actions .marks-edit-btn{background:#dbeafe}
+.marks-row-actions .marks-delete-btn{background:#fee2e2;color:#991b1b}
+.marks-row-actions .marks-save-btn{background:#dcfce7;color:#166534}
 </style>
 
 </head>
@@ -239,6 +255,20 @@
       <button id="saveMarksButton" type="submit">Save Marks</button>
       <p id="marksMessage" class="status" role="status"></p>
     </form>
+    <hr>
+    <h4>🏫 Enter Whole-Class Marks</h4>
+    <label for="classMarksClass">Select class</label>
+    <select id="classMarksClass"><option value="">Select a class</option></select>
+    <label for="classMarksExam">Exam name</label>
+    <input id="classMarksExam" placeholder="e.g. Unit Test 1">
+    <label for="classMarksSubject">Subject</label>
+    <select id="classMarksSubject"><option value="">Loading subjects...</option></select>
+    <label for="classMarksMax">Maximum marks</label>
+    <input id="classMarksMax" type="number" min="0.01" step="0.01">
+    <button type="button" id="loadClassMarksButton">Load Students</button>
+    <p id="classMarksMessage" class="status" role="status"></p>
+    <div id="classMarksList">Select a class, exam and subject, then click Load Students.</div>
+    <button type="button" id="saveClassMarksButton">Save Whole-Class Marks</button>
     <hr>
     <h4>View Student Results</h4>
     <label for="resultsStudent">Select a student (or all students)</label>
